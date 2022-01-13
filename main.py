@@ -1,6 +1,10 @@
 import discord
 import pickle
 import asyncio
+import pandas as pd
+# https://www.freecodecamp.org/news/connect-python-with-sql/
+import mysql.connector
+from mysql.connector import Error
 from discord.ext import commands 
 client = commands.Bot(command_prefix=".")
 client.remove_command('help')
@@ -17,4 +21,6 @@ async def on_message(message):
 async def message(ctx):
     await ctx.send("It worked!")
 
-client.run("")
+
+token = pickle.load( open( "token.p", "rb" ) )
+client.run(token)
