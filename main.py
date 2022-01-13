@@ -17,9 +17,18 @@ async def on_ready():
 async def on_message(message):
     await client.process_commands(message)
 
+@client.command(aliases=["h"])
+async def help(ctx):
+    await ctx.send("This message lacks assistance in any form!")
+
 @client.command(aliases=["m"])
 async def message(ctx):
     await ctx.send("It worked!")
+
+@client.command(aliases=["c"])
+@commands.has_role('<@&929940836475625513>')
+async def crisis(ctx):
+    ctx.send("CRISIS!!")
 
 
 token = pickle.load( open( "token.p", "rb" ) )
