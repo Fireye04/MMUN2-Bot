@@ -26,9 +26,10 @@ async def message(ctx):
     await ctx.send("It worked!")
 
 @client.command(aliases=["c"])
-@commands.has_role('<@&929940836475625513>')
+# only chair can use
+@commands.has_role(929940836475625513)
 async def crisis(ctx):
-    ctx.send("CRISIS!!")
+    await ctx.send("CRISIS!!")
 
 
 token = pickle.load( open( "token.p", "rb" ) )
