@@ -2,13 +2,12 @@
 name = "mmun2-bot"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Fireye <<>>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-"discord.py" = "^1.7.3"
-mysql-connector-python = "^8.0.27"
-pandas = "^1.3.5"
+py-cord = "^1.7.3"
+discord = "^1.7.3"
 
 [tool.poetry.dev-dependencies]
 
