@@ -52,14 +52,50 @@ async def message(ctx, args):
     role = get(ctx.guild.roles, id=930978900803215410)
     countryRoles.append(role)
 
-    countryNames = ["Germany", "germany", "US", "us", "United States", "united states", "France", "france", "Russia", "russia", "Ottoman", "Ottoman Empire", "ottoman empire", "ottoman", "Ottomans", "ottomans", "China", "china", "japan", "Japan", "Italy", "italy", "Ireland", "ireland"]
+    germany = ["Germany", "germany"]
+    
+    us = ["US", "us", "United States", "united states"]
+
+    france = ["France", "france"]
+
+    russia = ["Russia", "russia"]
+
+    ottoman = ["Ottoman", "Ottoman Empire", "ottoman empire", "ottoman", "Ottomans", "ottomans"]
+
+    china = ["China", "china"]
+
+    japan = ["japan", "Japan"]
+
+    italy = ["Italy", "italy"]
+
+    ireland = ["Ireland", "ireland"]
     
     author = ctx.message.author
+    #init aRole as @everyone, reassigned later
+    aRole = get(ctx.guild.roles, id=929935033869951016)
     target = args
     print("from- "+ author.name + "\nto- " + target)
 
-    if target in countryNames:
-        print("win")
+    for i, role in enumerate(countryRoles):
+        if role in author.roles:
+            aRole = role
+    
+    if target in germany and aRole.name != "Germany":
+        
+        await ctx.send("Configuring chat with " + target + "...", delete_after=5)
+        
+        category = get(ctx.guild.categories, name="GERMANY")
+
+        channel = await ctx.guild.create_text_channel(aRole.name + "-" + target, category=category)
+        
+        gRole = get(ctx.guild.roles, id=930978865654927421)
+        
+        await channel.send("Channel configuration success! " + gRole.mention + ", " + aRole.mention)
+        
+        await bot.delete_message(ctx.message)
+        
+    if target in germany and aRole.name == "Germany":
+        await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.")
     else:
         print("lose")
     await ctx.send("It worked!")
@@ -69,7 +105,6 @@ async def message(ctx, args):
 @commands.has_role(929940836475625513)
 async def crisis(ctx):
     await ctx.send("CRISIS!!")
-
 
 token = pickle.load(open("token.p", "rb"))
 client.run(token)
