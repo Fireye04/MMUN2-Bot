@@ -1,3 +1,3 @@
 token.p
-poetry.lock
+packager poetry.lock
 pyproject.toml
