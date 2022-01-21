@@ -224,9 +224,9 @@ async def crisis(ctx):
 @client.command(aliases=["co"])
 # only chair can use
 async def crisisOpt(ctx):
-    embed = discord.Embed(title='Crisis Opt', value="test", color=0x00ff00)
-    embed.add_field(name='Replicate', value="f", inline=True)
-    embed.add_field(name='Reported By', value="g", inline=True)
+    embed = discord.Embed(title='Crisis Opt', description="Are you currently available to deal with a crisis?", color=0x00ff00)
+    embed.add_field(name='React', value="f", inline=False)
+    embed.add_field(name='Reported By', value="g", inline=False)
     await ctx.send(embed=embed)
 
 token = pickle.load(open("token.p", "rb"))
