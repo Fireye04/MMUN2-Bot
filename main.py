@@ -75,6 +75,7 @@ async def messageCountry(ctx, args):
     #init aRole as @everyone, reassigned later
     aRole = get(ctx.guild.roles, id=929935033869951016)
     target = args
+    targetID = 3
     print("from- "+ author.name + "\nto- " + target)
 
 
@@ -82,307 +83,137 @@ async def messageCountry(ctx, args):
     for i, role in enumerate(countryRoles):
         if role in author.roles:
             aRole = role
+
+
+
+
     
     if target in germany and aRole.name != "Germany":
         
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
-        
-        category = get(ctx.guild.categories, name="GERMANY")
-        
-        aRoleName = aRole.name.lower()
-        
-        for channel in ctx.guild.channels:
-            if channel.name == "germany-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=930978865654927421)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "germany-" + aRoleName)
-
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-        else:
-            channel = await ctx.guild.create_text_channel("germany-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-        
-        
-        
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-        
-        await ctx.message.delete()
+        target = "Germany"
+        targetID = 930978865654927421
     
     elif target in germany and aRole.name == "Germany":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
+        await ctx.message.delete()
+        
     elif target in us and aRole.name != "US":
         
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
+        target = "US"
+        targetID = 930978983800098837
         
-        category = get(ctx.guild.categories, name="US")
-
-        aRoleName = aRole.name.lower()
-        
-        for channel in ctx.guild.channels:
-            if channel.name == "us-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=930978983800098837)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "us-" + aRoleName)
-
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-        else:
-            
-            channel = await ctx.guild.create_text_channel("us-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-        
-        
-        
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-        
-        await ctx.message.delete()
     elif target in us and aRole.name == "US":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
+        await ctx.message.delete()
+        
     elif target in france and aRole.name != "France":
-        
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
-        
-        category = get(ctx.guild.categories, name="FRANCE")
 
-        aRoleName = aRole.name.lower()
+        target = "France"
+        targetID = 933471681530462299
         
-        for channel in ctx.guild.channels:
-            if channel.name == "france-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=933471681530462299)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "france-" + aRoleName)
-
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-        else:
-            
-            channel = await ctx.guild.create_text_channel("france-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-        
-        
-        
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-        
-        await ctx.message.delete()
     elif target in france and aRole.name == "France":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
+        await ctx.message.delete()
+        
     elif target in russia and aRole.name != "Russia":
-        
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
-        
-        category = get(ctx.guild.categories, name="RUSSIA")
 
-        aRoleName = aRole.name.lower()
+        target = "Russia"
+        targetID = 933471787776368640
         
-        for channel in ctx.guild.channels:
-            if channel.name == "russia-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=933471787776368640)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "russia-" + aRoleName)
-
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-        else:
-            
-            channel = await ctx.guild.create_text_channel("russia-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-        
-        
-        
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-        
-        await ctx.message.delete()
     elif target in russia and aRole.name == "Russia":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
+        await ctx.message.delete()
+        
     elif target in ottoman and aRole.name != "Ottoman":
-        
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
-        
-        category = get(ctx.guild.categories, name="OTTOMAN")
 
-        aRoleName = aRole.name.lower()
+        target = "Ottoman"
+        targetID = 933471880806014986
         
-        for channel in ctx.guild.channels:
-            if channel.name == "ottoman-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=933471880806014986)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "ottoman-" + aRoleName)
-
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-        else:
-            
-            channel = await ctx.guild.create_text_channel("ottoman-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-        
-        
-        
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-        
-        await ctx.message.delete()
     elif target in ottoman and aRole.name == "Ottoman":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-    elif target in japan and aRole.name != "Japan":
-        
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
-        
-        category = get(ctx.guild.categories, name="JAPAN")
-
-        aRoleName = aRole.name.lower()
-        
-        for channel in ctx.guild.channels:
-            if channel.name == "japan-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=933471997059551272)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "japan-" + aRoleName)
-
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-            
-        else:
-            
-            channel = await ctx.guild.create_text_channel("japan-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-        
-        
-        
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-        
         await ctx.message.delete()
+        
+    elif target in japan and aRole.name != "Japan":
+
+        target= "Japan"
+        targetID = 933471997059551272
+        
     elif target in japan and aRole.name == "Japan":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
+        await ctx.message.delete()
+        
     elif target in china and aRole.name != "China":
         
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
+        target = "China"
+        targetID = 930978937440460851
         
-        category = get(ctx.guild.categories, name="CHINA")
-
-        aRoleName = aRole.name.lower()
-        
-        for channel in ctx.guild.channels:
-            if channel.name == "china-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=930978937440460851)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "china-" + aRoleName)
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-            
-        else:
-            
-            channel = await ctx.guild.create_text_channel("china-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-        
-        
-        
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-        
-        await ctx.message.delete()
     elif target in china and aRole.name == "China":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
+        await ctx.message.delete()
+        
     elif target in italy and aRole.name != "Italy":
-        
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
-        
-        category = get(ctx.guild.categories, name="ITALY")
 
-        aRoleName = aRole.name.lower()
+        target = "Italy"
+        targetID = 930979017610367066
         
-        for channel in ctx.guild.channels:
-            if channel.name == "italy-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=930979017610367066)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "italy-" + aRoleName)
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-            
-        else:
-            
-            channel = await ctx.guild.create_text_channel("italy-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-        
-        
-        
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-        
-        await ctx.message.delete()
     elif target in italy and aRole.name == "Italy":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-    elif target in ireland and aRole.name != "Ireland":
-        
-        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
-        
-        category = get(ctx.guild.categories, name="IRELAND")
-
-        aRoleName = aRole.name.lower()
-        
-        for channel in ctx.guild.channels:
-            if channel.name == "ireland-" + aRoleName:
-                exist = True
-                break
-            else:
-                exist = False
-
-        uRole = get(ctx.guild.roles, id=930978900803215410)
-        
-        if exist == True:
-            channel = get(ctx.guild.channels, name = "ireland-" + aRoleName)
-            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-        else:
-            
-            channel = await ctx.guild.create_text_channel("ireland-" + aRole.name, category=category)
-            await channel.set_permissions(aRole, view_channel=True)
-            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)       
-        
-        
-        
         await ctx.message.delete()
+        
+    elif target in ireland and aRole.name != "Ireland":
+
+        target = "Ireland"
+        targetID = 930978900803215410
+        
     elif target in ireland and aRole.name == "Ireland":
+        
         await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
+        await ctx.message.delete()
+        
     else:
         await ctx.send("Could not find country. Please try again", delete_after=5)
         await ctx.message.delete()
+        
     # await ctx.send("It worked!")
+
+    if targetID != 3:
+        await ctx.send("Configuring chat with " + target + "...", delete_after=3)
+        
+        category = get(ctx.guild.categories, name= target.upper())
+        
+        aRoleName = aRole.name.lower()
+        targetL = target.lower() + "-"
+        
+        for channel in ctx.guild.channels:
+            if channel.name == targetL + aRoleName:
+                exist = True
+                break
+            else:
+                exist = False
+
+        uRole = get(ctx.guild.roles, id= targetID)
+        
+        if exist == True:
+            channel = get(ctx.guild.channels, name = targetL + aRoleName)
+
+            await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
+        else:
+            channel = await ctx.guild.create_text_channel(targetL + aRole.name, category=category)
+            await channel.set_permissions(aRole, view_channel=True)
+        
+        
+        
+            await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
+        
+        await ctx.message.delete()
 
 @client.command(aliases=["c"])
 # only chair can use
