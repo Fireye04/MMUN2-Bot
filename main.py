@@ -77,6 +77,8 @@ async def messageCountry(ctx, args):
     target = args
     print("from- "+ author.name + "\nto- " + target)
 
+
+    # ONLY ONE ROLE PER PERSON PLS
     for i, role in enumerate(countryRoles):
         if role in author.roles:
             aRole = role
