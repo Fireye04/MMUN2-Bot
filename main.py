@@ -221,5 +221,13 @@ async def messageCountry(ctx, args):
 async def crisis(ctx):
     await ctx.send("CRISIS!!")
 
+@client.command(aliases=["co"])
+# only chair can use
+async def crisisOpt(ctx):
+    embed = discord.Embed(title='Crisis Opt', value="test", color=0x00ff00)
+    embed.add_field(name='Replicate', value="f", inline=True)
+    embed.add_field(name='Reported By', value="g", inline=True)
+    await ctx.send(embed=embed)
+
 token = pickle.load(open("token.p", "rb"))
 client.run(token)
