@@ -123,6 +123,7 @@ async def message(ctx, args):
             gRole = get(ctx.guild.roles, id=930978865654927421)
             channel = await ctx.guild.create_text_channel("germany-" + aRole.name, category=category)
             await channel.set_permissions(aRole, view_channel=True)
+            exist = True
         
         
         
