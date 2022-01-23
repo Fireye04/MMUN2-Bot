@@ -221,6 +221,7 @@ async def messageCountry(ctx, args):
 async def crisis(ctx):
     await ctx.send("CRISIS!!")
 
+
 @client.command(aliases=["co"])
 # only chair can use
 async def crisisOpt(ctx):
