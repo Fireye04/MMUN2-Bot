@@ -229,5 +229,6 @@ async def crisisOpt(ctx):
     embed.add_field(name='Reported By', value="g", inline=False)
     await ctx.send(embed=embed)
 
+
 token = pickle.load(open("token.p", "rb"))
 client.run(token)
