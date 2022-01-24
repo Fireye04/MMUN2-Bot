@@ -1,12 +1,17 @@
 import discord
 import pickle
 import asyncio
+import sqlite3
 #import pandas as pd
 from discord.utils import get    
 from discord.ext import commands 
 client = commands.Bot(command_prefix=".")
 client.remove_command('help')
 
+
+con = sqlite3.connect("sqlite.db")
+
+pen = con.cursor()
 
 
 
