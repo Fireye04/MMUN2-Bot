@@ -13,7 +13,7 @@ con = sqlite3.connect("sqlite.db")
 
 pen = con.cursor()
 
-
+# pen.execute("DROP TABLE countries")
 
 
 @client.event
