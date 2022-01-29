@@ -9,6 +9,7 @@ client = commands.Bot(command_prefix=".")
 client.remove_command('help')
 
 
+
 con = sqlite3.connect("sqlite.db")
 
 pen = con.cursor()
