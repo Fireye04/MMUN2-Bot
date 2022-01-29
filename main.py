@@ -13,7 +13,7 @@ con = sqlite3.connect("sqlite.db")
 
 pen = con.cursor()
 
-# pen.execute("DROP TABLE countries")
+pen.execute("CREATE TABLE countries( country_id int, name text, size int, religious_affiliation text, leader text, research_and_development int);")
 
 
 @client.event
@@ -59,6 +59,7 @@ async def messageCountry(ctx, args):
     countryRoles.append(role)
 
     germany = ["Germany", "germany"]
+
     
     us = ["US", "us", "United States", "united states"]
 
@@ -88,7 +89,6 @@ async def messageCountry(ctx, args):
     for i, role in enumerate(countryRoles):
         if role in author.roles:
             aRole = role
-
 
 
 
