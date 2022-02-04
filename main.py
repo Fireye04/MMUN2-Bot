@@ -14,7 +14,7 @@ con = sqlite3.connect("sqlite.db")
 
 pen = con.cursor()
 
-pen.execute("CREATE TABLE countries( country_id int, name text, size int, religious_affiliation text, leader text, research_and_development int);")
+pen.execute("CREATE TABLE alliances( name text, founder text, );")
 
 
 @client.event
