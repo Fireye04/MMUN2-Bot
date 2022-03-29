@@ -12,6 +12,7 @@ client.remove_command('help')
 async def on_ready():
     print("Ready")
 
+
 def save_object(obj, filename):
     with open(filename, 'wb') as outp:  # Overwrites any existing file.
         pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
@@ -26,30 +27,59 @@ def save_object(obj, filename):
     #await client.process_commands(message)
 
 class country ():
-	#on country creation
-	async def __init__(self, ctx, name, ):
+	#on country creation, add government later
+	async def __init__(self, ctx, name):
 		
 		self.name = name
 		self.manager = ctx.message.author
 		
-		
 		#create country category
-		await ctx.message.guild.create_category(name)
+		self.category = await ctx.message.guild.create_category(name)
 
 		#Make a country role
 
-		await ctx.guild.create_role(name=name)
+		self.role = await ctx.guild.create_role(name=name)
+		await ctx.message.author.add_roles(self.role)
 		
 		#make a private chair DM
-		chair = get(ctx.message.guild.channel, name='Chair')
-		await chair.create_text_channel(name)
 		
+		chair = get(ctx.message.guild.channel, name='Chair')
+		self.chairChannel = await chair.create_text_channel(name + "-chair")
+		await self.chairChannel.set_permissions( ctx.message.guild.default_role, view_channel=False)
+		await self.chairChannel.set_permissions( self.role, view_channel=True)
+
+		#randomly assign base stats
+
+		#Awunga bunga
 		
 
-@client.command(aliases=["c", "cc"])
-async def create(ctx):
+@client.command(aliases=["cc"])
+async def createCountry(ctx):
 	await ctx.send("Country Creation process initiated!")
-	# PLEASE FOR THE LOVE OF GOD MAKE THE FIRST LETTER OF NAME CAPITALIZED
+	def nameCountry ():
+		async with ctx.typing():
+			await asyncio.sleep(2)
+		# PLEASE FOR THE LOVE OF GOD MAKE THE FIRST LETTER OF NAME CAPITALIZED
+		await ctx.send("What will your country be named?")
+		def check(m):
+			return m.channel == ctx.message.channel and m.author == ctx.message.author
+		name = await client.wait_for('message', check=check)
+		if name == "quit" or name == "exit":
+			return
+		await ctx.send(f"Is {name.content} correct? (y/n)")
+		def check(m):
+			return m.channel == ctx.message.channel and m.author == ctx.message.author
+		proceed = await client.wait_for('message', check=check)
+		if proceed == "quit" or proceed == "exit":
+			return
+		elif proceed == "n":
+			nameCountry()
+		elif proceed == "y":
+			return name
+	nameCountry()
+	
+		
+	
 
 @client.command(aliases=["h"])
 async def help(ctx):
