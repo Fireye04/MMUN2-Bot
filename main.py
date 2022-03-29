@@ -1,25 +1,20 @@
 import discord
 import pickle
 import asyncio
-import sqlite3
-#import pandas as pd
-from discord.utils import get    
+
+from discord.utils import get
 from discord.ext import commands 
 client = commands.Bot(command_prefix=".")
 client.remove_command('help')
 
 
-
-con = sqlite3.connect("sqlite.db")
-
-pen = con.cursor()
-
-pen.execute("CREATE TABLE alliances( name text, founder text, );")
-
-
 @client.event
 async def on_ready():
     print("Ready")
+
+def save_object(obj, filename):
+    with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
 
 #@client.event
 #async def on_message(message):
@@ -30,11 +25,39 @@ async def on_ready():
         
     #await client.process_commands(message)
 
+class country ():
+	#on country creation
+	async def __init__(self, ctx, name, ):
+		
+		self.name = name
+		self.manager = ctx.message.author
+		
+		
+		#create country category
+		await ctx.message.guild.create_category(name)
+
+		#Make a country role
+
+		await ctx.guild.create_role(name=name)
+		
+		#make a private chair DM
+		chair = get(ctx.message.guild.channel, name='Chair')
+		await chair.create_text_channel(name)
+		
+		
+
+@client.command(aliases=["c", "cc"])
+async def create(ctx):
+	await ctx.send("Country Creation process initiated!")
+	# PLEASE FOR THE LOVE OF GOD MAKE THE FIRST LETTER OF NAME CAPITALIZED
+
 @client.command(aliases=["h"])
 async def help(ctx):
     #no help
     await ctx.send("This message lacks assistance in any form!")
 
+
+"""
 @client.command(aliases=["m"])
 async def messageCountry(ctx, args):
     #ideally creates a new chat/thread for any chats
@@ -220,7 +243,7 @@ async def messageCountry(ctx, args):
             await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
         
         await ctx.message.delete()
-
+"""
 @client.command(aliases=["c"])
 # only chair can use
 @commands.has_role(929940836475625513)
