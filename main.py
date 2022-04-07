@@ -2,13 +2,23 @@ import discord
 import pickle
 import asyncio
 import nest_asyncio
+from random import randint
+
 
 nest_asyncio.apply()
 from discord.utils import get
 from discord.ext import commands
-
-client = commands.Bot(command_prefix=".")
+intents = discord.Intents.default()
+intents.members = True
+client = commands.Bot(command_prefix=".", intents = intents)
 client.remove_command('help')
+
+"""
+NOTES!
+- Add religion
+- Add governments
+"""
+
 
 
 @client.event
@@ -21,7 +31,7 @@ def save_object(obj, filename):
 		pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
 
 Countries = []
-save_object(Countries, "Countries")
+#save_object(Countries, "Countries")
 # Countries = pickle.load("Countries")
 
 #@client.event
@@ -32,26 +42,33 @@ save_object(Countries, "Countries")
 #await client.process_commands(message)
 
 
-async def aClassInitCategory(ctx, name):
-	return await ctx.message.guild.create_category(name)
-
-
-async def aClassInitRoleCreate(ctx, name):
-	return await ctx.guild.create_role(name=name)
-
-
-async def aClassInitRoleAdd(ctx, name, self):
-	await ctx.message.author.add_roles(self.role)
+async def aClassInitCategory(ctx, name, self):
+	cat = await ctx.message.guild.create_category(name)
+	await cat.create_text_channel(self.name.lower() + "-general")
 	return
 
 
-async def aClassInitChairChannel(ctx, name, chair):
-	return await chair.create_text_channel(name + "-chair")
+async def aClassInitRoleCreate(ctx, name):
+	await ctx.guild.create_role(name=name)
+	return
+
+
+async def aClassInitRoleAdd(ctx, name, self):
+	manager = get(ctx.message.guild.members, id = self.managerID)
+	await manager.add_roles(get(ctx.message.guild.roles, name= self.roleName))
+	return
+
+
+async def aClassInitChairChannel(ctx, name, chair, self):
+	await chair.create_text_channel(self.chairChannelName)
+	return
+	
 
 
 async def aClassInitChairPerms(ctx, name, self):
-	await self.chairChannel.set_permissions(ctx.message.guild.default_role, view_channel=False)
-	await self.chairChannel.set_permissions(self.role, view_channel=True)
+	cc = get(ctx.guild.channels, name=self.chairChannelName)
+	await cc.set_permissions(ctx.message.guild.default_role, view_channel=False)
+	await cc.set_permissions(get(ctx.message.guild.roles, name= self.roleName), view_channel=True)
 	return
 		
 		
@@ -59,35 +76,143 @@ class Country():
 	#on country creation, add government later
 	# Note to self, check for duplicates, or previously owned countries
 	def __init__(self, ctx, name):
-	
+		#Equal to categoryName and roleName
 		self.name = name
-		self.manager = ctx.message.author
+		self.managerID = ctx.message.author.id
 		#create country category
 		
 		
 		
-		self.category = asyncio.run(aClassInitCategory(ctx, name))
+		self.categoryName = name
+		asyncio.run(aClassInitCategory(ctx, name, self))
 		
 		#Make a country role
 		
-		self.role = asyncio.run(aClassInitRoleCreate(ctx, name))
+		self.roleName = name
+		asyncio.run(aClassInitRoleCreate(ctx, name))
 		asyncio.run(aClassInitRoleAdd(ctx, name, self))
 		
 		#make a private chair DM
 		
-		chair = get(ctx.message.guild.categories, name='Chair')
+		chair = get(ctx.message.guild.categories, name='chair')
 		
-		self.chairChannel = asyncio.run(aClassInitChairChannel(ctx, name, chair))
+		self.chairChannelName = name.lower() + '-chair'
+		asyncio.run(aClassInitChairChannel(ctx, name, chair, self))
 		
 		asyncio.run(aClassInitChairPerms(ctx, name, self))
 		
 		#randomly assign base stats
-		
+		#Population
+		#-Education
+		#-Nationalism
+		#Natural Resources
+		#Wealth
+		#-Income
+		#Army
+		#-Size
+		#-Combat power
+		#-Unit types
+		#-Tactics
+		#Infrastructure
+		#-Standard of living
+		#Tech
 		#Awunga bunga
-			
-			
-			# NOTE TO SELF DELETE COUNTRIES WHEN THEIR OWNER LEAVES THE SERVER
+
+		self.population = randint(1,10)
+
+		self.education = randint(1,10)
+
+		self.nationalism = randint(1,10)
+
+		self.natural_resources = randint(1,10)
+
+		self.wealth = 0
+
+		self.income = 0
+
+		self.army_size = 0
+
+		self.combat_power = 0
+
+		self.unit_types = ["Infantry"]
+
+		self.tactics = randint(1,10)
+
+		self.infrastructure = randint(1,10)
+
+		self.tech = [
+			("pottery", )
+		]
+		# NOTE TO SELF DELETE COUNTRIES WHEN THEIR OWNER LEAVES THE SERVER
+
+
+
+@client.command(aliases=["clr333"])
+@commands.has_role(929940836475625513)
+async def clear333(ctx):
+	await ctx.send("Clr: \n1- Countries \n2- Chair Channels \n3- Categories \n4- Roles")
+	def check(m):
+		return m.channel == ctx.message.channel and m.author == ctx.message.author
+	clrOption = await client.wait_for('message', check=check)
+	clrOption = clrOption.content
+	
+	if clrOption == "1":
+		with open('Countries', 'rb') as ctry:
+			Countries = pickle.load(ctry)
+		Countries = []
+		save_object(Countries, "Countries")
+		await ctx.send("Cleared!")
+	elif clrOption == "2":
+		chair = get(ctx.message.guild.categories, name='chair')
+		if len(chair.channels) >= 1:
+			for chan in chair.channels:
+				await chan.delete()
+			await ctx.send("Complete!")
+		else:
+			await ctx.send("Error: No channels found")
+	elif clrOption == "3":
+		whitelist = ["mmun", "text channels", "chair"]
+		death = ctx.guild.categories
+		await ctx.send(f"Whitelist: {whitelist}\n\nPLEASE CONFIRM OR EDIT CODE. CAPS MATTER.")
+		def check(m):
+			return m.channel == ctx.message.channel and m.author == ctx.message.author
+		confirm = await client.wait_for('message', check=check)
+		await confirm.delete()
+		confirm = confirm.content
 		
+		if confirm == "wednesday":
+			for cat in death:
+				if cat.name in whitelist:
+					print(f"saved {cat.name}")
+				else:
+					await cat.delete()
+					print(f"killed {cat.name}")
+					
+			await ctx.send("Complete!")
+		else:
+			await ctx.send("Cancelled.")
+	elif clrOption == "4":
+		whitelist = ["Chair", "Programmer", "Tester", "Bot", "MMUN Bot"]
+		death = ctx.guild.roles
+		await ctx.send(f"Whitelist: {whitelist}\n\nPLEASE CONFIRM OR EDIT CODE. CAPS MATTER.")
+		def check(m):
+			return m.channel == ctx.message.channel and m.author == ctx.message.author
+		confirm = await client.wait_for('message', check=check)
+		await confirm.delete()
+		confirm = confirm.content
+		
+		if confirm == "thursday":
+			for rle in death:
+				if rle.name in whitelist or rle.name == "@everyone":
+					print(f"saved {rle.name}")
+				else:
+					await rle.delete()
+					print(f"killed {rle.name}")
+					
+			await ctx.send("Complete!")
+		else:
+			await ctx.send("Cancelled.")
+				
 		
 @client.command(aliases=["cc"])
 async def createCountry(ctx):
@@ -95,9 +220,9 @@ async def createCountry(ctx):
 		Countries = pickle.load(ctry)
 		
 	for country in Countries:
-		if country.manager == ctx.message.author:
+		if country.managerID == ctx.message.author.id:
 			await ctx.send(f"Looks like you already own {country.name}! Please delete it before making a new country! (Delete feature in progress)")
-			#return
+			return
 			break
 		
 	await ctx.send("Country Creation process initiated!")
@@ -126,7 +251,7 @@ async def createCountry(ctx):
 	countre = Country(ctx, name.content)
 	Countries.append(countre)
 	await ctx.send(Countries)
-	await save_object(Countries, "Countries")
+	save_object(Countries, "Countries")
 		
 		
 @client.command(aliases=["h"])
