@@ -17,6 +17,12 @@ client.remove_command('help')
 NOTES!
 - Add religion
 - Add governments
+
+
+BRAINSTORM
+- 1 unit of time
+	- 24 hours
+
 """
 
 
@@ -126,7 +132,7 @@ class Country():
 
 		self.natural_resources = randint(1,10)
 
-		self.wealth = 0
+		self.wealth = 10
 
 		self.income = 0
 
@@ -141,16 +147,39 @@ class Country():
 		self.infrastructure = randint(1,10)
 
 		self.tech = [
-			("pottery", )
+			("pottery", False)
 		]
 		# NOTE TO SELF DELETE COUNTRIES WHEN THEIR OWNER LEAVES THE SERVER
+
+	async def getStats(self, ctx):
+		embedVar = discord.Embed(title=f"{self.name} Stats", description="Country statistics", color= 0xe74c3c)
+		embedVar.add_field(name=str(self.population), value="Population", inline=True)
+		embedVar.add_field(name=str(self.education), value="Education", inline=True)
+		embedVar.add_field(name=str(self.nationalism), value="Nationalism", inline=True)
+		embedVar.add_field(name=str(self.natural_resources), value="Natural Resources", inline=True)
+		embedVar.add_field(name=str(self.wealth), value="Wealth", inline=True)
+		embedVar.add_field(name=str(self.income), value="Income", inline=True)
+		embedVar.add_field(name=str(self.army_size), value="Army Size", inline=True)
+		embedVar.add_field(name=str(self.population), value="Population", inline=True)
+		embedVar.add_field(name=str(self.combat_power), value="Combat Power", inline=True)
+		embedVar.add_field(name=str(self.unit_types), value="Unit Types", inline=True)
+		embedVar.add_field(name=str(self.tactics), value="Tactics", inline=True)
+		embedVar.add_field(name=str(self.infrastructure), value="Infrastructure", inline=True)
+		embedVar.add_field(name=str(self.tech), value="Tech", inline=True)
+		await ctx.send(embed=embedVar)
 
 
 
 @client.command(aliases=["clr333"])
 @commands.has_role(929940836475625513)
 async def clear333(ctx):
-	await ctx.send("Clr: \n1- Countries \n2- Chair Channels \n3- Categories \n4- Roles")
+	embedVar = discord.Embed(title="Clear", description="Clear Menu", color= 0xe74c3c)
+	embedVar.add_field(name="1- Countries", value="Clear the countries list", inline=False)
+	embedVar.add_field(name="2- Chair Channels", value="Clear all the chair channels", inline=False)
+	embedVar.add_field(name="3- Categories", value="Clear all the categories", inline=False)
+	embedVar.add_field(name="4- Roles", value="Clear all the roles", inline=False)
+	embedVar.add_field(name="5- A country", value="Clear a specific country", inline=False)
+	await ctx.send(embed=embedVar)
 	def check(m):
 		return m.channel == ctx.message.channel and m.author == ctx.message.author
 	clrOption = await client.wait_for('message', check=check)
@@ -212,13 +241,62 @@ async def clear333(ctx):
 			await ctx.send("Complete!")
 		else:
 			await ctx.send("Cancelled.")
+	elif clrOption == "5":
+		ctrys = []
+		with open('Countries', 'rb') as ctry:
+			Countries = pickle.load(ctry)
+		for i in Countries:
+			ctrys.append(i.name)
+			
+		await ctx.send(f"Select a country: \n{ctrys}")
+		
+		def check(m):
+			return m.channel == ctx.message.channel and m.author == ctx.message.author
+		confirm = await client.wait_for('message', check=check)
+		confirmC = confirm.content
+		if confirmC in ctrys:
+			await ctx.send(f"Delete {confirmC}? (y/n)")
+			confi = await client.wait_for('message', check=check)
+			confi = confi.content
+			for i in Countries:
+				if i.name == confirmC:
+					target = i
+			if confi == "y":
+				Countries.remove(target)
+				save_object(Countries, "Countries")
 				
+				chair = get(ctx.message.guild.categories, name='chair')
+				for i in chair.channels:
+					if i.name == target.chairChannelName:
+						await i.delete()
+
+				cat = get(ctx.guild.categories, name=target.categoryName)
+				if cat != None:
+					await cat.delete()
+				else:
+					pass
+					# await ctx.send(f"Cancelled.")
+
+				rle = get(ctx.guild.roles, name=target.roleName)
+				if rle != None:
+					await rle.delete()
+				else:
+					pass
+					# await ctx.send(f"Cancelled.")
+				await ctx.send("Complete!")
+				return
+			else:
+				await ctx.send(f"Cancelled.")
+				return
+		else:
+			await ctx.send(f"{confirmC} not found. Please try again.")
+			return
 		
 @client.command(aliases=["cc"])
 async def createCountry(ctx):
 	with open('Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
-		
+	await ctx.send(Countries)
 	for country in Countries:
 		if country.managerID == ctx.message.author.id:
 			await ctx.send(f"Looks like you already own {country.name}! Please delete it before making a new country! (Delete feature in progress)")
@@ -252,7 +330,19 @@ async def createCountry(ctx):
 	Countries.append(countre)
 	await ctx.send(Countries)
 	save_object(Countries, "Countries")
-		
+
+@client.command(aliases=["s"])
+async def stats(ctx):
+	target = None
+	with open('Countries', 'rb') as ctry:
+		Countries = pickle.load(ctry)
+	for i in Countries:
+		if ctx.message.author.id == i.managerID:
+			target = i
+			break
+	print(target)
+	if target != None:
+		await target.getStats(ctx)
 		
 @client.command(aliases=["h"])
 async def help(ctx):
