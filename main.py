@@ -73,11 +73,13 @@ async def aClassInitChairChannel(ctx, name, chair, self):
 
 async def aClassInitChairPerms(ctx, name, self):
 	cc = get(ctx.guild.channels, name=self.chairChannelName)
+	print(self.chairChannelName)
 	await cc.set_permissions(ctx.message.guild.default_role, view_channel=False)
 	await cc.set_permissions(get(ctx.message.guild.roles, name= self.roleName), view_channel=True)
 	return
 		
-		
+
+
 class Country():
 	#on country creation, add government later
 	# Note to self, check for duplicates, or previously owned countries
@@ -86,8 +88,7 @@ class Country():
 		self.name = name
 		self.managerID = ctx.message.author.id
 		#create country category
-		
-		
+
 		
 		self.categoryName = name
 		asyncio.run(aClassInitCategory(ctx, name, self))
@@ -142,8 +143,6 @@ class Country():
 
 		self.unit_types = ["Infantry"]
 
-		self.tactics = randint(1,10)
-
 		self.infrastructure = randint(1,10)
 
 		self.tech = [
@@ -163,11 +162,9 @@ class Country():
 		embedVar.add_field(name=str(self.population), value="Population", inline=True)
 		embedVar.add_field(name=str(self.combat_power), value="Combat Power", inline=True)
 		embedVar.add_field(name=str(self.unit_types), value="Unit Types", inline=True)
-		embedVar.add_field(name=str(self.tactics), value="Tactics", inline=True)
 		embedVar.add_field(name=str(self.infrastructure), value="Infrastructure", inline=True)
 		embedVar.add_field(name=str(self.tech), value="Tech", inline=True)
 		await ctx.send(embed=embedVar)
-
 
 
 @client.command(aliases=["clr333"])
@@ -214,6 +211,8 @@ async def clear333(ctx):
 				if cat.name in whitelist:
 					print(f"saved {cat.name}")
 				else:
+					for channel in cat.channels:
+						await channel.delete()
 					await cat.delete()
 					print(f"killed {cat.name}")
 					
@@ -348,8 +347,8 @@ async def stats(ctx):
 async def help(ctx):
 	#no help
 	await ctx.send("This message lacks assistance in any form!")
-		
-		
+
+	
 """
 @client.command(aliases=["m"])
 async def messageCountry(ctx, args):
