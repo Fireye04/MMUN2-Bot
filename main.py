@@ -104,7 +104,7 @@ class Country():
 		
 		chair = get(ctx.message.guild.categories, name='chair')
 		
-		self.chairChannelName = self.channelNames
+		self.chairChannelName = self.channelNames + "-chair"
 		asyncio.run(aClassInitChairChannel(ctx, name, chair, self))
 		
 		asyncio.run(aClassInitChairPerms(ctx, name, self))
@@ -181,7 +181,9 @@ class Country():
 			#also remember commas, dumbass
 			#Name, Is complete?, %of completion
 			("Mine", False, 0),
-			("Lumber Mill", False, 0)
+			("Lumber Mill", False, 0),
+			("Agriculture", False, 0),
+			("Animal Husbandry", False, 0)
 		]
 			
 		#self.army_size = 0
