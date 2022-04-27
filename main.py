@@ -33,9 +33,11 @@ async def on_ready():
 	print("Ready")
 
 
+
 def save_object(obj, filename):
 	with open(filename, 'wb') as outp:  # Overwrites any existing file.
 		pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+
 
 Countries = []
 #save_object(Countries, "Countries")
@@ -48,6 +50,18 @@ Countries = []
 
 #await client.process_commands(message)
 
+@client.command(aliases=["h"])
+async def help(ctx):
+	#no help
+	#await ctx.send("This message lacks assistance in any form!")
+	embedVar = discord.Embed(title=f"Help", description="Command help", color= 0xe74c3c)
+	embedVar.add_field(name="Create Country (.cc)", value="Creates a country", inline=False)
+	embedVar.add_field(name="Statistics (.s)", value="Check your country statistics", inline=False)
+	embedVar.add_field(name="Technology (.t)", value="Check your technological progression", inline=False)
+	embedVar.add_field(name="Message (.m <country>)", value="Send a private message to anoter country", inline=False)
+	await ctx.send(embed=embedVar)
+
+
 
 async def aClassInitCategory(ctx, name, self):
 	cat = await ctx.message.guild.create_category(name)
@@ -55,9 +69,11 @@ async def aClassInitCategory(ctx, name, self):
 	return
 
 
+
 async def aClassInitRoleCreate(ctx, name):
 	await ctx.guild.create_role(name=name)
 	return
+
 
 
 async def aClassInitRoleAdd(ctx, name, self):
@@ -66,10 +82,12 @@ async def aClassInitRoleAdd(ctx, name, self):
 	return
 
 
+
 async def aClassInitChairChannel(ctx, name, chair, self):
 	await chair.create_text_channel(self.chairChannelName)
 	return
 	
+
 
 
 async def aClassInitChairPerms(ctx, name, self):
@@ -79,6 +97,7 @@ async def aClassInitChairPerms(ctx, name, self):
 	await cc.set_permissions(get(ctx.message.guild.roles, name= self.roleName), view_channel=True)
 	return
 		
+
 
 
 class Country():
@@ -104,7 +123,7 @@ class Country():
 		
 		chair = get(ctx.message.guild.categories, name='chair')
 		
-		self.chairChannelName = self.channelNames
+		self.chairChannelName = self.channelNames + "-chair"
 		asyncio.run(aClassInitChairChannel(ctx, name, chair, self))
 		
 		asyncio.run(aClassInitChairPerms(ctx, name, self))
@@ -181,7 +200,9 @@ class Country():
 			#also remember commas, dumbass
 			#Name, Is complete?, %of completion
 			("Mine", False, 0),
-			("Lumber Mill", False, 0)
+			("Lumber Mill", False, 0),
+			("Agriculture", False, 0),
+			("Animal Husbandry", False, 0)
 		]
 			
 		#self.army_size = 0
@@ -224,6 +245,9 @@ class Country():
 		embedVar.add_field(name=str(self.uranium), value="Uranium", inline=True)
 		embedVar.add_field(name=str(self.food), value="Food", inline=True)
 		await ctx.send(embed=embedVar)
+
+
+
 
 
 @client.command(aliases=["clr333"])
@@ -330,7 +354,10 @@ async def clear333(ctx):
 						await i.delete()
 
 				cat = get(ctx.guild.categories, name=target.categoryName)
+				
 				if cat != None:
+					for channel in cat.channels:
+						await channel.delete()
 					await cat.delete()
 				else:
 					pass
@@ -378,8 +405,7 @@ async def clear333(ctx):
 			
 			
 				
-				
-		
+
 @client.command(aliases=["cc"])
 async def createCountry(ctx):
 	with open('Countries', 'rb') as ctry:
@@ -419,6 +445,9 @@ async def createCountry(ctx):
 	await ctx.send(Countries)
 	save_object(Countries, "Countries")
 
+
+
+
 @client.command(aliases=["s"])
 async def stats(ctx):
 	target = None
@@ -432,8 +461,10 @@ async def stats(ctx):
 	if target != None:
 		await target.getStats(ctx)
 
+
+
 @client.command(aliases=["t", "tech"])
-async def technologies(ctx):
+async def technology(ctx):
 	target = None
 	with open('Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
@@ -445,199 +476,94 @@ async def technologies(ctx):
 	if target != None:
 		await target.techTree(ctx)
 
-@client.command(aliases=["h"])
-async def help(ctx):
-	#no help
-	await ctx.send("This message lacks assistance in any form!")
 
-	
-"""
+
 @client.command(aliases=["m"])
-async def messageCountry(ctx, args):
-#ideally creates a new chat/thread for any chats
-exist = False
-countryRoles = []
-role = get(ctx.guild.roles, id=930978865654927421)
-countryRoles.append(role)
-role = get(ctx.guild.roles, id=930978983800098837)
-countryRoles.append(role)
-role = get(ctx.guild.roles, id=933471681530462299)
-countryRoles.append(role)
-role = get(ctx.guild.roles, id=933471787776368640)
-countryRoles.append(role)
-role = get(ctx.guild.roles, id=933471880806014986)
-countryRoles.append(role)
-role = get(ctx.guild.roles, id=933471997059551272)
-countryRoles.append(role)
-role = get(ctx.guild.roles, id=930978937440460851)
-countryRoles.append(role)
-role = get(ctx.guild.roles, id=930979017610367066)
-countryRoles.append(role)
-role = get(ctx.guild.roles, id=930978900803215410)
-countryRoles.append(role)
+async def message(ctx, args=None):
+	
+	with open('Countries', 'rb') as ctry:
+		Countries = pickle.load(ctry)
+		
+	options = []
+	for i in Countries:
+		options.append(i.name)
 
-germany = ["Germany", "germany"]
-
-
-us = ["US", "us", "United States", "united states"]
-
-france = ["France", "france"]
-
-russia = ["Russia", "russia"]
-
-ottoman = ["Ottoman", "Ottoman Empire", "ottoman empire", "ottoman", "Ottomans", "ottomans"]
-
-china = ["China", "china"]
-
-japan = ["japan", "Japan"]
-
-italy = ["Italy", "italy"]
-
-ireland = ["Ireland", "ireland"]
-
-author = ctx.message.author
-#init aRole as @everyone, reassigned later
-aRole = get(ctx.guild.roles, id=929935033869951016)
-target = args
-targetID = 3
-print("from- "+ author.name + "\nto- " + target)
-
-
-# ONLY ONE ROLE PER PERSON PLS
-for i, role in enumerate(countryRoles):
-if role in author.roles:
-	aRole = role
-
-
-
-
-if target in germany and aRole.name != "Germany":
-
-target = "Germany"
-targetID = 930978865654927421
-
-elif target in germany and aRole.name == "Germany":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-elif target in us and aRole.name != "US":
-
-target = "US"
-targetID = 930978983800098837
-
-elif target in us and aRole.name == "US":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-elif target in france and aRole.name != "France":
-
-target = "France"
-targetID = 933471681530462299
-
-elif target in france and aRole.name == "France":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-elif target in russia and aRole.name != "Russia":
-
-target = "Russia"
-targetID = 933471787776368640
-
-elif target in russia and aRole.name == "Russia":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-elif target in ottoman and aRole.name != "Ottoman":
-
-target = "Ottoman"
-targetID = 933471880806014986
-
-elif target in ottoman and aRole.name == "Ottoman":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-elif target in japan and aRole.name != "Japan":
-
-target= "Japan"
-targetID = 933471997059551272
-
-elif target in japan and aRole.name == "Japan":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-elif target in china and aRole.name != "China":
-
-target = "China"
-targetID = 930978937440460851
-
-elif target in china and aRole.name == "China":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-elif target in italy and aRole.name != "Italy":
-
-target = "Italy"
-targetID = 930979017610367066
-
-elif target in italy and aRole.name == "Italy":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-elif target in ireland and aRole.name != "Ireland":
-
-target = "Ireland"
-targetID = 930978900803215410
-
-elif target in ireland and aRole.name == "Ireland":
-
-await ctx.send("Stop trying to talk to yourself. If you have no friends, just say so.", delete_after=5)
-await ctx.message.delete()
-
-else:
-await ctx.send("Could not find country. Please try again", delete_after=5)
-await ctx.message.delete()
-
-# await ctx.send("It worked!")
-
-if targetID != 3:
-await ctx.send("Configuring chat with " + target + "...", delete_after=3)
-
-category = get(ctx.guild.categories, name= target.upper())
-
-aRoleName = aRole.name.lower()
-targetL = target.lower() + "-"
-
-for channel in ctx.guild.channels:
-	if channel.name == targetL + aRoleName:
-		exist = True
-		break
+	userC = None
+	for i in Countries:
+		if ctx.message.author.id == i.managerID:
+			userC = i
+			break
+			
+	if userC == None:
+		await ctx.send("Please make a country before using this command.")
+		return
+	
+	if args == None:
+		await ctx.send("Please specify which country you want to contact. Your options are as follows: ", delete_after=3)
+		await ctx.send(options, delete_after=10)
+		def check(m):
+			return m.channel == ctx.message.channel and m.author == ctx.message.author
+		name = await client.wait_for('message', check=check)
+		print(options)
+		if name.content in options:
+			target = name.content
+		else:
+			await ctx.send("Country not found, watch your caps", delete_after=3)
+			return
+		await name.delete()
 	else:
-		exist = False
+		if args in options:
+			target = args
+		else:
+			await ctx.send("Country not found, watch your caps", delete_after=3)
+			return
+		
+	await ctx.send(f"Contacting {target}...", delete_after=3)
+	
+	for i, country in enumerate(Countries):
+		if country.name == target:
+			targetC = country
 
-uRole = get(ctx.guild.roles, id= targetID)
+	if targetC == None:
+		await ctx.send("404: Country not found", delete_after=3)
+		return
+	
+	
+	category = get(ctx.guild.categories, name= targetC.categoryName)
+	
+	targetRoleName = targetC.roleName
+	targetChannelName = targetC.channelNames
 
-if exist == True:
-	channel = get(ctx.guild.channels, name = targetL + aRoleName)
+	userRoleName = userC.roleName
+	userChannelName = userC.channelNames
 
-	await channel.send(uRole.mention + " You have mail from " + aRole.mention + "!")
-else:
-	channel = await ctx.guild.create_text_channel(targetL + aRole.name, category=category)
-	await channel.set_permissions(aRole, view_channel=True)
-
-
-
-	await channel.send("Channel configuration success! " + uRole.mention + ", " + aRole.mention)
-
-await ctx.message.delete()
-"""
+	comboChannelName = targetChannelName + "-" + userChannelName
+	
+	for channel in ctx.guild.channels:
+		if channel.name == comboChannelName:
+			exist = True
+			break
+		else:
+			exist = False
+	
+	userRole = get(ctx.guild.roles, name=userRoleName)
+	targetRole = get(ctx.guild.roles, name=targetRoleName)
+	
+	if exist == True:
+		channel = get(ctx.guild.channels, name = comboChannelName)
+	
+		await channel.send(userRole.mention + " You have mail from " + targetRole.mention + "!")
+	else:
+		channel = await ctx.guild.create_text_channel(comboChannelName, category=category)
+		await channel.set_permissions(targetRole, view_channel=True, send_messages=True)
+		await channel.set_permissions(userRole, view_channel=True, send_messages=True)
+		await channel.set_permissions(ctx.guild.default_role, view_channel=False)
+	
+	
+	
+		await channel.send("Channel configuration success! " + userRole.mention + ", " + targetRole.mention)
+	
+	await ctx.message.delete()
 		
 		
 @client.command(aliases=["c"])
@@ -647,6 +573,8 @@ async def crisis(ctx):
 	await ctx.send("CRISIS!!")
 	
 	
+
+
 @client.command(aliases=["co"])
 # only chair can use
 async def crisisOpt(ctx):
@@ -660,5 +588,7 @@ async def crisisOpt(ctx):
 
 #token = "sugondese nutz"
 #save_object(token, "token.p")
+
+
 token = pickle.load(open("token.p", "rb"))
 client.run(token)
