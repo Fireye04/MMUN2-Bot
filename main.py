@@ -33,9 +33,11 @@ async def on_ready():
 	print("Ready")
 
 
+
 def save_object(obj, filename):
 	with open(filename, 'wb') as outp:  # Overwrites any existing file.
 		pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+
 
 Countries = []
 #save_object(Countries, "Countries")
@@ -55,9 +57,11 @@ async def aClassInitCategory(ctx, name, self):
 	return
 
 
+
 async def aClassInitRoleCreate(ctx, name):
 	await ctx.guild.create_role(name=name)
 	return
+
 
 
 async def aClassInitRoleAdd(ctx, name, self):
@@ -66,10 +70,12 @@ async def aClassInitRoleAdd(ctx, name, self):
 	return
 
 
+
 async def aClassInitChairChannel(ctx, name, chair, self):
 	await chair.create_text_channel(self.chairChannelName)
 	return
 	
+
 
 
 async def aClassInitChairPerms(ctx, name, self):
@@ -79,6 +85,7 @@ async def aClassInitChairPerms(ctx, name, self):
 	await cc.set_permissions(get(ctx.message.guild.roles, name= self.roleName), view_channel=True)
 	return
 		
+
 
 
 class Country():
@@ -226,6 +233,8 @@ class Country():
 		embedVar.add_field(name=str(self.uranium), value="Uranium", inline=True)
 		embedVar.add_field(name=str(self.food), value="Food", inline=True)
 		await ctx.send(embed=embedVar)
+
+
 
 
 @client.command(aliases=["clr333"])
@@ -381,7 +390,13 @@ async def clear333(ctx):
 			
 				
 				
+
+
+
+
 		
+
+
 @client.command(aliases=["cc"])
 async def createCountry(ctx):
 	with open('Countries', 'rb') as ctry:
@@ -421,6 +436,8 @@ async def createCountry(ctx):
 	await ctx.send(Countries)
 	save_object(Countries, "Countries")
 
+
+
 @client.command(aliases=["s"])
 async def stats(ctx):
 	target = None
@@ -434,6 +451,8 @@ async def stats(ctx):
 	if target != None:
 		await target.getStats(ctx)
 
+
+
 @client.command(aliases=["t", "tech"])
 async def technologies(ctx):
 	target = None
@@ -446,6 +465,8 @@ async def technologies(ctx):
 	print(target)
 	if target != None:
 		await target.techTree(ctx)
+
+
 
 @client.command(aliases=["h"])
 async def help(ctx):
@@ -649,6 +670,8 @@ async def crisis(ctx):
 	await ctx.send("CRISIS!!")
 	
 	
+
+
 @client.command(aliases=["co"])
 # only chair can use
 async def crisisOpt(ctx):
@@ -662,5 +685,7 @@ async def crisisOpt(ctx):
 
 #token = "sugondese nutz"
 #save_object(token, "token.p")
+
+
 token = pickle.load(open("token.p", "rb"))
 client.run(token)
