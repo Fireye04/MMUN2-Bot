@@ -1,4 +1,4 @@
-simport discord
+import discord
 import pickle
 import asyncio
 import nest_asyncio
