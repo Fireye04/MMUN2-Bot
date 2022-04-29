@@ -564,7 +564,16 @@ async def research(ctx, *, arg=None):
 	if arg == None:
 		pass
 
+
 	
+pass
+
+# get actions
+@client.command(aliases=["a"])
+async def actions(ctx, *, arg=None):
+	if arg == None:
+		pass
+
 pass
 
 # Message another country
