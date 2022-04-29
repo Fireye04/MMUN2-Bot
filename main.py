@@ -27,10 +27,13 @@ BRAINSTORM
 	- 24 hours
 
 """
-
+# Do stuff when a time unit passes
 async def timeUnit():
 	pass
 
+pass
+# when the bot is ready
+# Used to run the time loop
 @client.event
 async def on_ready():
 	print("Ready")
@@ -52,6 +55,8 @@ async def on_ready():
 		i+=1
 
 
+pass
+#Pickle function
 def save_object(obj, filename):
 	with open(filename, 'wb') as outp:  # Overwrites any existing file.
 		pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
@@ -68,6 +73,7 @@ Countries = []
 
 #await client.process_commands(message)
 
+# Help Command
 @client.command(aliases=["h"])
 async def help(ctx):
 	#no help
@@ -81,6 +87,8 @@ async def help(ctx):
 
 
 
+pass
+########CLASS INIT#########
 async def aClassInitCategory(ctx, name, self):
 	cat = await ctx.message.guild.create_category(name)
 	await cat.create_text_channel(self.channelNames + "-general")
@@ -117,7 +125,11 @@ async def aClassInitChairPerms(ctx, name, self):
 		
 
 
+pass
 
+########CLASS INIT#########
+
+# Country class declaration
 class Country():
 	#on country creation, add government later
 	# Note to self, check for duplicates, or previously owned countries
@@ -268,6 +280,9 @@ class Country():
 
 
 
+pass
+
+# Clear command
 @client.command(aliases=["clr333"])
 @commands.has_role(929940836475625513)
 async def clear333(ctx):
@@ -424,6 +439,9 @@ async def clear333(ctx):
 			
 				
 
+pass
+
+# Create a new country
 @client.command(aliases=["cc"])
 async def createCountry(ctx):
 	with open('Countries', 'rb') as ctry:
@@ -466,6 +484,9 @@ async def createCountry(ctx):
 
 
 
+pass
+
+# Get country stats
 @client.command(aliases=["s"])
 async def stats(ctx):
 	target = None
@@ -481,6 +502,9 @@ async def stats(ctx):
 
 
 
+pass
+
+# Get tech details
 @client.command(aliases=["t", "tech"])
 async def technology(ctx, *, arg=None):
 	
@@ -532,12 +556,18 @@ async def technology(ctx, *, arg=None):
 
 
 
+pass
+
+# research techs
 @client.command(aliases=["r"])
 async def research(ctx, *, arg=None):
 	if arg == None:
 		pass
 
 	
+pass
+
+# Message another country
 @client.command(aliases=["m"])
 async def message(ctx, args=None):
 	
@@ -626,6 +656,9 @@ async def message(ctx, args=None):
 	await ctx.message.delete()
 		
 		
+pass
+
+# Begin a crisis
 @client.command(aliases=["c"])
 # only chair can use
 @commands.has_role(929940836475625513)
@@ -635,8 +668,10 @@ async def crisis(ctx):
 	
 
 
+pass
+
+# Opt in/out of crises
 @client.command(aliases=["co"])
-# only chair can use
 async def crisisOpt(ctx):
 	embed = discord.Embed(
 	title='Crisis Opt',
@@ -650,5 +685,8 @@ async def crisisOpt(ctx):
 #save_object(token, "token.p")
 
 	
+pass
+
+#Run
 token = pickle.load(open("token.p", "rb"))
 client.run(token)
