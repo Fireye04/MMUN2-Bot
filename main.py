@@ -2,15 +2,17 @@ import discord
 import pickle
 import asyncio
 import nest_asyncio
-from random import randint
+# from random import randint
 from random import choice
 import re
+from datetime import datetime
 
 nest_asyncio.apply()
 from discord.utils import get
 from discord.ext import commands
 intents = discord.Intents.default()
 intents.members = True
+intents.messages = True
 client = commands.Bot(command_prefix=".", intents = intents)
 client.remove_command('help')
 
@@ -25,15 +27,36 @@ BRAINSTORM
 	- 24 hours
 
 """
+# Do stuff when a time unit passes
+async def timeUnit():
+	pass
 
-
-
+pass
+# when the bot is ready
+# Used to run the time loop
 @client.event
 async def on_ready():
 	print("Ready")
+	
+	
+	botChannel = get(client.get_guild(929935033869951016).channels, name="bot-announcements")
+	
+	i = 0
+	while True:
+		tme = datetime.now()
+		t = tme.strftime("%X")
+		if i%5 == 0:
+			print(t)
+		#midnight is 07:00:00
+		if t == "00:8:00":
+			await botChannel.send("One time unit has passed!")
+			await timeUnit()
+		await asyncio.sleep(1)
+		i+=1
 
 
-
+pass
+#Pickle function
 def save_object(obj, filename):
 	with open(filename, 'wb') as outp:  # Overwrites any existing file.
 		pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
@@ -50,6 +73,7 @@ Countries = []
 
 #await client.process_commands(message)
 
+# Help Command
 @client.command(aliases=["h"])
 async def help(ctx):
 	#no help
@@ -63,6 +87,8 @@ async def help(ctx):
 
 
 
+pass
+########CLASS INIT#########
 async def aClassInitCategory(ctx, name, self):
 	cat = await ctx.message.guild.create_category(name)
 	await cat.create_text_channel(self.channelNames + "-general")
@@ -99,7 +125,11 @@ async def aClassInitChairPerms(ctx, name, self):
 		
 
 
+pass
 
+########CLASS INIT#########
+
+# Country class declaration
 class Country():
 	#on country creation, add government later
 	# Note to self, check for duplicates, or previously owned countries
@@ -198,11 +228,11 @@ class Country():
 
 		self.tech = [
 			#also remember commas, dumbass
-			#Name, Is complete?, %of completion
-			("Mine", False, 0),
-			("Lumber Mill", False, 0),
-			("Agriculture", False, 0),
-			("Animal Husbandry", False, 0)
+			#Name, %of completion, cost
+			["Mine", 0, 1000],
+			["Lumber Mill", 0, 1000],
+			["Agriculture", 0, 1000],
+			["Animal Husbandry", 0, 1000]
 		]
 			
 		#self.army_size = 0
@@ -219,11 +249,11 @@ class Country():
 	async def techTree(self, ctx):
 		embedVar = discord.Embed(title=f"{self.name} Tech", description="Country technologies", color= 0xe74c3c)
 		for i, techno in enumerate(self.tech):
-			if techno[2] > 0 and techno[2] < 1:
+			if techno[1] > 0 and techno[1] < 1:
 				embedVar.add_field(name=techno[0], value="In Progress", inline=False)
-			elif techno[2] == 0:
+			elif techno[1] == 0:
 				embedVar.add_field(name=techno[0], value="Unresearched", inline=False)
-			elif techno[2] == 1:
+			elif techno[1] == 1:
 				embedVar.add_field(name=techno[0], value="Completed", inline=False)
 		await ctx.send(embed=embedVar)
 		
@@ -250,6 +280,9 @@ class Country():
 
 
 
+pass
+
+# Clear command
 @client.command(aliases=["clr333"])
 @commands.has_role(929940836475625513)
 async def clear333(ctx):
@@ -406,6 +439,9 @@ async def clear333(ctx):
 			
 				
 
+pass
+
+# Create a new country
 @client.command(aliases=["cc"])
 async def createCountry(ctx):
 	with open('Countries', 'rb') as ctry:
@@ -448,6 +484,9 @@ async def createCountry(ctx):
 
 
 
+pass
+
+# Get country stats
 @client.command(aliases=["s"])
 async def stats(ctx):
 	target = None
@@ -463,8 +502,12 @@ async def stats(ctx):
 
 
 
+pass
+
+# Get tech details
 @client.command(aliases=["t", "tech"])
-async def technology(ctx):
+async def technology(ctx, *, arg=None):
+	
 	target = None
 	with open('Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
@@ -472,12 +515,59 @@ async def technology(ctx):
 		if ctx.message.author.id == i.managerID:
 			target = i
 			break
-	print(target)
-	if target != None:
-		await target.techTree(ctx)
+			
+	if arg == None:
+		print(target)
+		if target != None:
+			await target.techTree(ctx)
+	else:
+		###ADD MORE TECHS HERE###
+		
+		if arg.lower() == "mine":
+			
+			embedVar = discord.Embed(title=f"Mine", description="Tech details", color= 0xe74c3c)
+			embedVar.add_field(name="Allows the mining of ore", value="Effects", inline=False)
+			embedVar.add_field(name="$" + str(target.tech[0][2] ), value="Tech cost (per time unit)", inline=False)
+			await ctx.send(embed=embedVar)
+			
+		if arg.lower() == "lumber mill":
+			
+			embedVar = discord.Embed(title=f"Lumber Mill", description="Tech details", color= 0xe74c3c)
+			embedVar.add_field(name="Allows the collection of lumber", value="Effects", inline=False)
+			embedVar.add_field(name="$"+str(target.tech[1][2]), value="Tech cost (per time unit)", inline=False)
+			await ctx.send(embed=embedVar)
+			
+			
+		if arg.lower() == "agriculture":
+			
+			embedVar = discord.Embed(title=f"Agriculture", description="Tech details", color= 0xe74c3c)
+			embedVar.add_field(name="Allows the harvesting of food", value="Effects", inline=False)
+			embedVar.add_field(name="$"+str(target.tech[2][2]), value="Tech cost (per time unit)", inline=False)
+			await ctx.send(embed=embedVar)
+			
+		if arg.lower() == "animal husbandry":
+			
+			embedVar = discord.Embed(title=f"Animal Husbandry", description="Tech details", color= 0xe74c3c)
+			embedVar.add_field(name="Allows the domestication of animals for food", value="Effects", inline=False)
+			embedVar.add_field(name="$"+str(target.tech[3][2]), value="Tech cost (per time unit)", inline=False)
+			await ctx.send(embed=embedVar)
+			
+		###ADD MORE TECHS HERE###
 
 
 
+pass
+
+# research techs
+@client.command(aliases=["r"])
+async def research(ctx, *, arg=None):
+	if arg == None:
+		pass
+
+	
+pass
+
+# Message another country
 @client.command(aliases=["m"])
 async def message(ctx, args=None):
 	
@@ -566,6 +656,9 @@ async def message(ctx, args=None):
 	await ctx.message.delete()
 		
 		
+pass
+
+# Begin a crisis
 @client.command(aliases=["c"])
 # only chair can use
 @commands.has_role(929940836475625513)
@@ -575,8 +668,10 @@ async def crisis(ctx):
 	
 
 
+pass
+
+# Opt in/out of crises
 @client.command(aliases=["co"])
-# only chair can use
 async def crisisOpt(ctx):
 	embed = discord.Embed(
 	title='Crisis Opt',
@@ -589,6 +684,9 @@ async def crisisOpt(ctx):
 #token = "sugondese nutz"
 #save_object(token, "token.p")
 
+	
+pass
 
+#Run
 token = pickle.load(open("token.p", "rb"))
 client.run(token)
