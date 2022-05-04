@@ -36,9 +36,10 @@ async def timeUnit():
 	with open('Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	for target in Countries:
-		await target.techDevelop()
+		await target.timeUnitC()
 	save_object(Countries, "Countries")
 pass
+
 # when the bot is ready
 # Used to run the time loop
 @client.event
@@ -198,8 +199,10 @@ class Country():
 		army (specifics TBD)
 		tech
 		"""
-		#8
+		#8 OG, using other to cut uranium for now
 		stats = [1, 2, 4, 5, 5, 5, 8, 10]
+		
+		statsEdit = [1, 2, 4, 5, 5, 8, 10]
 
 		def yoink(stat):
 			global stats
@@ -215,11 +218,11 @@ class Country():
 
 		self.land_ore = yoink(stats)
 
-		self.land_uranium = yoink(stats)
+		#self.land_uranium = yoink(stats)
 
 		self.land_fertility = yoink(stats)
 
-		self.population = int((1000000 * self.land_size) / (self.standard_of_living/2))
+		self.population = int(self.land_size / (self.standard_of_living/5))
 		#NOTE: add birth and death rates later
 		self.education = yoink(stats)
 
@@ -228,14 +231,15 @@ class Country():
 		self.lumber = 0
 
 		self.ore = 0
-
-		self.uranium = 0
+		
+		#self.uranium = 0
 
 		self.wealth = 10
 		#note: come up with equation for income
 		self.income = 0
 
 		self.food = 0
+
 
 		self.tech = [
 			#also remember commas, dumbass
@@ -246,7 +250,13 @@ class Country():
 			["Animal Husbandry", False, 0, 5, 1000]
 		]
 
-		
+		self.infrastructure = [
+			# Name, Number (scale of 1-10), Quality?, Linked Tech (Put tech name) put "None" if no tech is required), researched? (Put True if no tech required), Cost per unit
+			["Mines", 0, 1, "Mine", False, 1000],
+			["Lumber Mills", 0, 1, "Lumber Mill", False, 1000],
+			["Farms", 0, 1, "Agriculture", False, 1000],
+			["Ranches", 0, 1, "Animal Husbandry", False, 1000]
+		]
 			
 		#self.army_size = 0
 
@@ -263,17 +273,21 @@ class Country():
 		embedVar = discord.Embed(title=f"{self.name} Tech", description="Country technologies", color= 0xe74c3c)
 		print(self.tech)
 		for techno in self.tech:
-			print(techno[0])
 			if techno[1] == True:
-				embedVar.add_field(name=techno[0] + " | In Progress", value=f"{int(techno[2]/techno[3] * 100)}% completed", inline=False)
+				thng = ":green_square: "
+				embedVar.add_field(name=thng + techno[0], value=f"{int(techno[2]/techno[3] * 100)}% completed", inline=False)
 			elif techno[2] < techno[3] and techno[2] > 0:
-				embedVar.add_field(name=techno[0], value=f"{int(techno[2]/techno[3] * 100)}% completed", inline=False)
+				thng = ":yellow_square: "
+				embedVar.add_field(name=thng + " " + techno[0], value=f"{int(techno[2]/techno[3] * 100)}% completed", inline=False)
 			elif techno[2] == 0:
-				embedVar.add_field(name=techno[0], value="Unresearched", inline=False)
+				thng = ":arrow_right: "
+				embedVar.add_field(name=thng + techno[0], value="Unresearched", inline=False)
 			elif techno[2] >= techno[3]:
-				embedVar.add_field(name=techno[0], value="Completed", inline=False)
+				thng = ":white_check_mark: "
+				embedVar.add_field(name=thng + techno[0], value="Completed", inline=False)
 			else:
-				embedVar.add_field(name=techno[0], value="Look the code broke, I'm sorry my guy", inline=False)
+				thng = ":exclamation: "
+				embedVar.add_field(name=thng + techno[0], value="Look the code broke, I'm sorry my guy", inline=False)
 		await ctx.send(embed=embedVar)
 		
 	async def getStats(self, ctx):
@@ -281,7 +295,7 @@ class Country():
 		embedVar.add_field(name=str(self.land_size), value="Land Size", inline=True)
 		embedVar.add_field(name=str(self.land_lumber), value="Land Lumber", inline=True)
 		embedVar.add_field(name=str(self.land_ore), value="Land Ore", inline=True)
-		embedVar.add_field(name=str(self.land_uranium), value="Land Uranium", inline=True)
+		#embedVar.add_field(name=str(self.land_uranium), value="Land Uranium", inline=True)
 		embedVar.add_field(name=str(self.land_fertility), value="Soil Fertility", inline=True)
 		embedVar.add_field(name=str(self.standard_of_living), value="Standard of Living", inline=True)
 		embedVar.add_field(name=str(self.nationalism), value="Nationalism", inline=True)
@@ -291,21 +305,36 @@ class Country():
 		embedVar.add_field(name=str(self.population), value="Population", inline=True)
 		embedVar.add_field(name=str(self.lumber), value="Lumber", inline=True)
 		embedVar.add_field(name=str(self.ore), value="Ore", inline=True)
-		embedVar.add_field(name=str(self.uranium), value="Uranium", inline=True)
+		#embedVar.add_field(name=str(self.uranium), value="Uranium", inline=True)
 		embedVar.add_field(name=str(self.food), value="Food", inline=True)
 		await ctx.send(embed=embedVar)
+		
+		embedVar = discord.Embed(title=f"{self.name} Infrastructure", description="Country infrastructure", color= 0xe74c3c)
+		i = 0
+		for item in self.infrastructure:
+			if item[4] == True:
+				i +=1
+				embedVar.add_field(name=item[0], value="Stats", inline=False)
+				embedVar.add_field(name=str(item[1]), value="Number of " + item[0], inline=True)
+				embedVar.add_field(name=str(item[2]), value="Quality of " + item[0], inline=True)
+		if i != 0:
+			await ctx.send(embed=embedVar)
+		
 
 
 
-
-
-	async def techDevelop(self):
+	async def timeUnitC(self):
 		for i in self.tech:
 			if i[1] == True:
 				i[2] += 1
 				if i[2] >= i[3]:
 					i[1] = False
 					print(i[0] + " completed!")
+					for item in self.infrastructure:
+						if item[3].lower() == i[0].lower():
+							item[4] = True
+
+						
 				#save_object(Countries, "Countries")
 				
 			# Leaving possibility for more than 1 tech in development
@@ -644,9 +673,85 @@ pass
 
 # get actions
 @client.command(aliases=["a"])
-async def actions(ctx, *, arg=None):
-	if arg == None:
-		pass
+async def actions(ctx):
+	
+	with open('Countries', 'rb') as ctry:
+		Countries = pickle.load(ctry)
+	target = None
+	for i in Countries:
+		if ctx.message.author.id == i.managerID:
+			target = i
+			break
+	if target == None:
+		return
+	
+	embedVar = discord.Embed(title=f"{target.name} Actions", description="Country Actions", color= 0xe74c3c)
+	embedVar.add_field(name="1) Build Infrastructure", value="Construct or improve crucial infrastructure", inline=False)
+	embedVar.add_field(name="2) Budget Allocation", value="INCOMPLETE", inline=False)
+	await ctx.send(embed=embedVar)
+
+	await ctx.send("Please provide the corresponding number for the option you wish to select")
+	
+	def check(m):
+		return m.channel == ctx.message.channel and m.author == ctx.message.author
+	aChoice = await client.wait_for('message', check=check)
+	print(aChoice.content)
+	if aChoice.content == "1":
+		embedVar = discord.Embed(title=f"{target.name} Infrastructure", description="Country Infrastructure", color= 0xe74c3c)
+		fields = 0
+		for i, item in enumerate(target.infrastructure):
+			# NOTE: add tech descriptors to list and implement here
+			if item[4] == True:
+				fields += 1
+				embedVar.add_field(name=f"{i+1}) Build {item[0]}", value=f"cost = {item[5]}", inline=False)
+		if fields == 0:
+			await ctx.send("No infrastructure found. Try researching some tech.")
+			return
+			
+		await ctx.send(embed=embedVar)
+
+		await ctx.send("Please provide the corresponding number for the option you wish to select")
+	
+		def check(m):
+			return m.channel == ctx.message.channel and m.author == ctx.message.author
+		iChoice = await client.wait_for('message', check=check)
+		
+		for i, item in enumerate(target.infrastructure):
+			if str(i+1) == iChoice.content:
+				#cost stuff that I have yet to implement
+				await ctx.send("How many do you wish to purchase? Max is 10, Min is 1. Type 'quit' to quit.")
+	
+				def check(m):
+					return m.channel == ctx.message.channel and m.author == ctx.message.author
+				numChoice = await client.wait_for('message', check=check)
+				numChoice = numChoice.content
+				if numChoice == "quit":
+					await ctx.send("Quit Process.")
+					return
+				try:
+					numChoice = int(numChoice)
+				except TypeError:
+					await ctx.send("Ur dumb. Give me a number, knucklehead.")
+					return
+				
+				if numChoice > 10:
+					numChoice = 10
+				elif numChoice == 0:
+					await ctx.send("Quit Process.")
+					return
+				elif numChoice < 1:
+					numChoice = 1
+
+				if item[1] + numChoice > 10:
+					numChoice = 10 - item[1]
+					
+				item[1] += numChoice
+				save_object(Countries, "Countries")
+
+				await ctx.send(f"{numChoice} {item[0]} purchased!")
+				
+				if numChoice == 1:
+					await ctx.send(f"Plurals are a pain in the ass to code, fuck you.")
 
 pass
 
