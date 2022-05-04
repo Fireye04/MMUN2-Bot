@@ -205,28 +205,28 @@ class Country():
 		statsEdit = [1, 2, 4, 5, 5, 8, 10]
 
 		def yoink(stat):
-			global stats
+			global statsEdit
 			e = choice(stat)
-			stats = stat.remove(e)
-			return e
+			statsEdit = stat.remove(e)
+			return int(e)
 
-		self.land_size = yoink(stats)
+		self.land_size = yoink(statsEdit)
 
-		self.standard_of_living = yoink(stats)
+		self.standard_of_living = yoink(statsEdit)
 
-		self.land_lumber = yoink(stats)
+		self.land_lumber = yoink(statsEdit)
 
-		self.land_ore = yoink(stats)
+		self.land_ore = yoink(statsEdit)
 
 		#self.land_uranium = yoink(stats)
 
-		self.land_fertility = yoink(stats)
+		self.land_fertility = yoink(statsEdit)
 
 		self.population = int(self.land_size / (self.standard_of_living/5))
 		#NOTE: add birth and death rates later
-		self.education = yoink(stats)
+		self.education = yoink(statsEdit)
 
-		self.nationalism = yoink(stats)
+		self.nationalism = yoink(statsEdit)
 
 		self.lumber = 0
 
@@ -324,6 +324,8 @@ class Country():
 
 
 	async def timeUnitC(self):
+		#advance tech
+		#NOTE: do cost stuff here
 		for i in self.tech:
 			if i[1] == True:
 				i[2] += 1
@@ -333,8 +335,36 @@ class Country():
 					for item in self.infrastructure:
 						if item[3].lower() == i[0].lower():
 							item[4] = True
+		# Generate resources
+		# HARD CODED
+		for item in self.infrastructure:
+			if item[1] > 0:
+				if item[0] == "Mines":
+					# Equation: Ore amount = Stat * Number of items * Quality
+					self.ore += int(((self.land_ore * item[1])//2) * item[2])
+					
+				if item[0] == "Lumber Mills":
+					# Equation: Lumber amount = Stat * Number of items * Quality
+					self.lumber += int(((self.land_lumber * item[1])//2) * item[2])
 
-						
+				if item[0] == "Farms":
+					# Equation: Food amount = Stat * Number of items * Quality
+					self.food += int(((self.land_fertility * item[1])//2) * item[2])
+
+				if item[0] == "Ranches":
+					# Equation: Ore amount = Constant * Number of items * Quality
+					self.food += int(((4 * item[1])//2) * item[2])
+
+		#population increase
+		self.population += 1
+		
+		#Food Subtraction
+		self.food -= self.population * (self.standard_of_living // 2)
+		
+		if self.food < 0:
+			needed = 0 - self.food
+			self.popultaion -= needed // 2
+			# Later, update to give a time buffer between deficit beginning and starvation
 				#save_object(Countries, "Countries")
 				
 			# Leaving possibility for more than 1 tech in development
