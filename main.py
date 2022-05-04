@@ -254,10 +254,15 @@ class Country():
 			# Name, Number (scale of 1-10), Quality?, Linked Tech (Put tech name) put "None" if no tech is required), researched? (Put True if no tech required), Cost per unit
 			["Mines", 0, 1, "Mine", False, 1000],
 			["Lumber Mills", 0, 1, "Lumber Mill", False, 1000],
-			["Farms", 0, 1, "Agriculture", False, 1000],
-			["Ranches", 0, 1, "Animal Husbandry", False, 1000]
+			["Farms", 1, 1, "Agriculture", False, 1000],
+			["Ranches", 1, 1, "Animal Husbandry", False, 1000]
 		]
-			
+
+
+		self.food_deficit = 0
+
+		self.starvation_time = 0
+		
 		#self.army_size = 0
 
 		#self.combat_power = 0
@@ -362,8 +367,15 @@ class Country():
 		self.food -= self.population * (self.standard_of_living // 2)
 		
 		if self.food < 0:
-			needed = 0 - self.food
-			self.popultaion -= needed // 2
+			
+			self.food_deficit = 0 - self.food
+			self.food = 0
+			self.starvation_time += 1
+			
+			if self.starvation_time >= 3:
+				self.population -= self.food_deficit // 2
+		else:
+			self.starvation_time = 0
 			# Later, update to give a time buffer between deficit beginning and starvation
 				#save_object(Countries, "Countries")
 				
