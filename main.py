@@ -1,7 +1,5 @@
 import nest_asyncio
 
-nest_asyncio.apply()
-
 import discord
 import pickle
 import asyncio
@@ -10,11 +8,12 @@ import asyncio
 from random import choice
 import re
 from datetime import datetime
-
-
 from discord.utils import get
 from discord.ext import commands
-intents = discord.Intents.default()
+
+nest_asyncio.apply()
+
+intents = discord.Intents.all()
 intents.members = True
 intents.messages = True
 client = commands.Bot(command_prefix=".", intents = intents)
@@ -94,7 +93,10 @@ async def help(ctx):
 	embedVar.add_field(name="Create Country (.cc)", value="Creates a country", inline=False)
 	embedVar.add_field(name="Statistics (.s)", value="Check your country statistics", inline=False)
 	embedVar.add_field(name="Technology (.t)", value="Check your technological progression", inline=False)
+	embedVar.add_field(name="Research (.r <tech>)", value="Research a specified tech", inline=False)
+	embedVar.add_field(name="Actions (.a)", value="Preform country actions", inline=False)
 	embedVar.add_field(name="Message (.m <country>)", value="Send a private message to anoter country", inline=False)
+
 	await ctx.send(embed=embedVar)
 
 
@@ -244,6 +246,8 @@ class Country():
 		self.tech = [
 			#also remember commas, dumbass
 			#Name, in Progress?, time in development, duration (in time units), cost
+
+			# My dumbass forgot to add a "is complete", but all you gotta do is if [2] >= [3] return true
 			["Mine", False, 0, 5, 1000],
 			["Lumber Mill", False, 0, 5, 1000],
 			["Agriculture", False, 0, 5, 1000],
@@ -324,8 +328,19 @@ class Country():
 				embedVar.add_field(name=str(item[2]), value="Quality of " + item[0], inline=True)
 		if i != 0:
 			await ctx.send(embed=embedVar)
-		
 
+		i = 0
+		embedVar = discord.Embed(title=f"{self.name} Tech", description="Country Technology",color=0xe74c3c)
+		for techno in self.tech:
+			if techno[2] >= techno[3]:
+				i += 1
+				embedVar.add_field(name=techno[0], value="Researched", inline=False)
+			elif techno[1]:
+				i += 1
+				embedVar.add_field(name=techno[0], value="In Progress", inline=False)
+
+		if i != 0:
+			await ctx.send(embed=embedVar)
 
 
 	async def timeUnitC(self):
@@ -380,8 +395,6 @@ class Country():
 				#save_object(Countries, "Countries")
 				
 			# Leaving possibility for more than 1 tech in development
-				
-pass
 
 # Clear command
 @client.command(aliases=["clr333"])
@@ -536,11 +549,7 @@ async def clear333(ctx):
 				for i in chnls:
 					await i.delete()
 				await ctx.send("Complete")
-			
-			
-				
 
-pass
 
 # Create a new country
 @client.command(aliases=["cc"])
@@ -584,9 +593,6 @@ async def createCountry(ctx):
 
 
 
-
-pass
-
 # Get country stats
 @client.command(aliases=["s"])
 async def stats(ctx):
@@ -601,9 +607,6 @@ async def stats(ctx):
 	if target != None:
 		await target.getStats(ctx)
 
-
-
-pass
 
 # Get tech details
 @client.command(aliases=["t", "tech"])
@@ -710,8 +713,7 @@ async def research(ctx, *, arg=None):
 		
 	tech[1] = True
 	save_object(Countries, "Countries")
-	
-pass
+
 
 # get actions
 @client.command(aliases=["a"])
@@ -911,7 +913,7 @@ async def crisisOpt(ctx):
 	embed.add_field(name='Reported By', value="g", inline=False)
 	await ctx.send(embed=embed)
 
-#token = "sugondese nutz"
+#token = "your mother"
 #save_object(token, "token.p")
 
 	
