@@ -242,26 +242,25 @@ class Country():
 
 		self.food = 0
 
-
 		self.tech = [
 			#also remember commas, dumbass
-			#Name, in Progress?, time in development, duration (in time units), cost
+			#Name, in Progress?, time in development, duration (in time units), cost, is Complete
 
 			# My dumbass forgot to add a "is complete", but all you gotta do is if [2] >= [3] return true
-			["Mine", False, 0, 5, 1000],
-			["Lumber Mill", False, 0, 5, 1000],
-			["Agriculture", False, 0, 5, 1000],
-			["Animal Husbandry", False, 0, 5, 1000]
+			# ignore that imma add it
+			["Mine", False, 0, 5, 1000, False],
+			["Lumber Mill", False, 0, 5, 1000, False],
+			["Agriculture", False, 0, 5, 1000, False],
+			["Animal Husbandry", False, 0, 5, 1000, False]
 		]
 
 		self.infrastructure = [
-			# Name, Number (scale of 1-10), Quality?, Linked Tech (Put tech name) put "None" if no tech is required), researched? (Put True if no tech required), Cost per unit
-			["Mines", 0, 1, "Mine", False, 1000],
-			["Lumber Mills", 0, 1, "Lumber Mill", False, 1000],
-			["Farms", 1, 1, "Agriculture", False, 1000],
-			["Ranches", 1, 1, "Animal Husbandry", False, 1000]
+			# Name, quantity (scale of 1-10), Quality?, Linked Tech (Put tech name) put "None" if no tech is required), Cost per unit
+			["Mines", 0, 1, "Mine", 1000],
+			["Lumber Mills", 0, 1, "Lumber Mill", 1000],
+			["Farms", 1, 1, "Agriculture", 1000],
+			["Ranches", 1, 1, "Animal Husbandry", 1000]
 		]
-
 
 		self.food_deficit = 0
 
@@ -277,7 +276,7 @@ class Country():
 		#self.tech = [
 		#	("pottery", False)
 		#]
-		# NOTE TO SELF DELETE COUNTRIES WHEN THEIR OWNER LEAVES THE SERVER
+		# TODO NOTE TO SELF DELETE COUNTRIES WHEN THEIR OWNER LEAVES THE SERVER
 	async def techTree(self, ctx):
 		embedVar = discord.Embed(title=f"{self.name} Tech", description="Country technologies", color= 0xe74c3c)
 		print(self.tech)
@@ -285,13 +284,13 @@ class Country():
 			if techno[1] == True:
 				thng = ":green_square: "
 				embedVar.add_field(name=thng + techno[0], value=f"{int(techno[2]/techno[3] * 100)}% completed", inline=False)
-			elif techno[2] < techno[3] and techno[2] > 0:
+			elif techno[3] > techno[2] > 0:
 				thng = ":yellow_square: "
 				embedVar.add_field(name=thng + " " + techno[0], value=f"{int(techno[2]/techno[3] * 100)}% completed", inline=False)
 			elif techno[2] == 0:
 				thng = ":arrow_right: "
 				embedVar.add_field(name=thng + techno[0], value="Unresearched", inline=False)
-			elif techno[2] >= techno[3]:
+			elif techno[5]:
 				thng = ":white_check_mark: "
 				embedVar.add_field(name=thng + techno[0], value="Completed", inline=False)
 			else:
@@ -321,11 +320,12 @@ class Country():
 		embedVar = discord.Embed(title=f"{self.name} Infrastructure", description="Country infrastructure", color= 0xe74c3c)
 		i = 0
 		for item in self.infrastructure:
-			if item[4] == True:
-				i +=1
-				embedVar.add_field(name=item[0], value="Stats", inline=False)
-				embedVar.add_field(name=str(item[1]), value="Number of " + item[0], inline=True)
-				embedVar.add_field(name=str(item[2]), value="Quality of " + item[0], inline=True)
+			for itemm in self.tech:
+				if itemm[0] == item[3] and itemm[5]:
+					i +=1
+					embedVar.add_field(name=item[0], value="Stats", inline=False)
+					embedVar.add_field(name=str(item[1]), value="Number of " + item[0], inline=True)
+					embedVar.add_field(name=str(item[2]), value="Quality of " + item[0], inline=True)
 		if i != 0:
 			await ctx.send(embed=embedVar)
 
@@ -345,16 +345,24 @@ class Country():
 
 	async def timeUnitC(self):
 		#advance tech
-		#NOTE: do cost stuff here
-		for i in self.tech:
-			if i[1] == True:
-				i[2] += 1
-				if i[2] >= i[3]:
-					i[1] = False
-					print(i[0] + " completed!")
-					for item in self.infrastructure:
-						if item[3].lower() == i[0].lower():
-							item[4] = True
+		#TODO: do cost stuff here
+		for item in self.tech:
+			# if in progress
+			if item[1]:
+				# Progress research
+				item[2] += 1
+				# if research complete
+				if item[2] >= item[3]:
+					# set in progress to false
+					item[1] = False
+					item[5] = True
+					print(item[0] + " completed!")
+
+					# Check if tech is a prerequisite for a building,
+					#!depreciated
+					"""for itemm in self.infrastructure:
+						if itemm[3].lower() == item[0].lower():
+							itemm[4] = True"""
 		# Generate resources
 		# HARD CODED
 		for item in self.infrastructure:
@@ -372,7 +380,7 @@ class Country():
 					self.food += int(((self.land_fertility * item[1])//2) * item[2])
 
 				if item[0] == "Ranches":
-					# Equation: Ore amount = Constant * Number of items * Quality
+					# Equation: Food amount = Constant * Number of items * Quality
 					self.food += int(((4 * item[1])//2) * item[2])
 
 		#population increase
@@ -744,10 +752,13 @@ async def actions(ctx):
 		embedVar = discord.Embed(title=f"{target.name} Infrastructure", description="Country Infrastructure", color= 0xe74c3c)
 		fields = 0
 		for i, item in enumerate(target.infrastructure):
-			# NOTE: add tech descriptors to list and implement here
-			if item[4] == True:
-				fields += 1
-				embedVar.add_field(name=f"{i+1}) Build {item[0]}", value=f"cost = {item[5]}", inline=False)
+			# TODO: add tech descriptors to list and implement here
+
+			for itemm in target.tech:
+
+				if item[3] == itemm[0] and itemm[5]:
+					fields += 1
+					embedVar.add_field(name=f"{i+1}) Build {item[0]}", value=f"cost = {item[4]}", inline=False)
 		if fields == 0:
 			await ctx.send("No infrastructure found. Try researching some tech.")
 			return
