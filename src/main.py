@@ -4,6 +4,8 @@ import discord
 import pickle
 import asyncio
 
+from Commands import *
+
 # from random import randint
 from random import choice
 import re
@@ -32,11 +34,11 @@ BRAINSTORM
 """
 # Do stuff when a time unit passes
 async def timeUnit():
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	for target in Countries:
 		await target.timeUnitC()
-	save_object(Countries, "Countries")
+	save_object(Countries, "src/pickle/Countries")
 pass
 
 # when the bot is ready
@@ -74,8 +76,8 @@ def save_object(obj, filename):
 
 
 Countries = []
-#save_object(Countries, "Countries")
-# Countries = pickle.load("Countries")
+#save_object(Countries, "src/pickle/Countries")
+# Countries = pickle.load("src/pickle/Countries")
 
 #@client.event
 #async def on_message(message):
@@ -400,7 +402,7 @@ class Country():
 		else:
 			self.starvation_time = 0
 			# Later, update to give a time buffer between deficit beginning and starvation
-				#save_object(Countries, "Countries")
+				#save_object(Countries, "src/pickle/Countries")
 				
 			# Leaving possibility for more than 1 tech in development
 
@@ -422,10 +424,10 @@ async def clear333(ctx):
 	clrOption = clrOption.content
 	
 	if clrOption == "1":
-		with open('Countries', 'rb') as ctry:
+		with open('src/pickle/Countries', 'rb') as ctry:
 			Countries = pickle.load(ctry)
 		Countries = []
-		save_object(Countries, "Countries")
+		save_object(Countries, "src/pickle/Countries")
 		await ctx.send("Cleared!")
 	elif clrOption == "2":
 		chair = get(ctx.message.guild.categories, name='chair')
@@ -481,7 +483,7 @@ async def clear333(ctx):
 			await ctx.send("Cancelled.")
 	elif clrOption == "5":
 		ctrys = []
-		with open('Countries', 'rb') as ctry:
+		with open('src/pickle/Countries', 'rb') as ctry:
 			Countries = pickle.load(ctry)
 		for i in Countries:
 			ctrys.append(i.name)
@@ -501,7 +503,7 @@ async def clear333(ctx):
 					target = i
 			if confi == "y":
 				Countries.remove(target)
-				save_object(Countries, "Countries")
+				save_object(Countries, "src/pickle/Countries")
 				
 				chair = get(ctx.message.guild.categories, name='chair')
 				for i in chair.channels:
@@ -562,7 +564,7 @@ async def clear333(ctx):
 # Create a new country
 @client.command(aliases=["cc"])
 async def createCountry(ctx):
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	await ctx.send(Countries)
 	for country in Countries:
@@ -597,7 +599,7 @@ async def createCountry(ctx):
 	countre = Country(ctx, name.content)
 	Countries.append(countre)
 	await ctx.send(Countries)
-	save_object(Countries, "Countries")
+	save_object(Countries, "src/pickle/Countries")
 
 
 
@@ -605,7 +607,7 @@ async def createCountry(ctx):
 @client.command(aliases=["s"])
 async def stats(ctx):
 	target = None
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	for i in Countries:
 		if ctx.message.author.id == i.managerID:
@@ -621,7 +623,7 @@ async def stats(ctx):
 async def technology(ctx, *, arg=None):
 	
 	target = None
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	for i in Countries:
 		if ctx.message.author.id == i.managerID:
@@ -675,7 +677,7 @@ pass
 async def research(ctx, *, arg=None):
 
 	target = None
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	for i in Countries:
 		if ctx.message.author.id == i.managerID:
@@ -720,14 +722,14 @@ async def research(ctx, *, arg=None):
 		prev[1] = False
 		
 	tech[1] = True
-	save_object(Countries, "Countries")
+	save_object(Countries, "src/pickle/Countries")
 
 
 # get actions
 @client.command(aliases=["a"])
 async def actions(ctx):
 	
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	target = None
 	for i in Countries:
@@ -801,7 +803,7 @@ async def actions(ctx):
 					numChoice = 10 - item[1]
 					
 				item[1] += numChoice
-				save_object(Countries, "Countries")
+				save_object(Countries, "src/pickle/Countries")
 
 				await ctx.send(f"{numChoice} {item[0]} purchased!")
 				
@@ -814,7 +816,7 @@ pass
 @client.command(aliases=["m"])
 async def message(ctx, args=None):
 	
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 		
 	options = []
@@ -929,7 +931,7 @@ async def crisisOpt(ctx):
 
 	
 pass
-
-#Run
-token = pickle.load(open("token.p", "rb"))
-client.run(token)
+if __name__ == "__main__":
+	#Run
+	token = pickle.load(open("src/pickle/token.p", "rb"))
+	client.run(token)
