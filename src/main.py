@@ -4,7 +4,7 @@ import discord
 import pickle
 import asyncio
 
-from Commands import *
+from Commands.help import getHelp
 
 # from random import randint
 from random import choice
@@ -89,17 +89,7 @@ Countries = []
 # Help Command
 @client.command(aliases=["h"])
 async def help(ctx):
-	#no help
-	#await ctx.send("This message lacks assistance in any form!")
-	embedVar = discord.Embed(title=f"Help", description="Command help", color= 0xe74c3c)
-	embedVar.add_field(name="Create Country (.cc)", value="Creates a country", inline=False)
-	embedVar.add_field(name="Statistics (.s)", value="Check your country statistics", inline=False)
-	embedVar.add_field(name="Technology (.t)", value="Check your technological progression", inline=False)
-	embedVar.add_field(name="Research (.r <tech>)", value="Research a specified tech", inline=False)
-	embedVar.add_field(name="Actions (.a)", value="Preform country actions", inline=False)
-	embedVar.add_field(name="Message (.m <country>)", value="Send a private message to anoter country", inline=False)
-
-	await ctx.send(embed=embedVar)
+	await getHelp(ctx)
 
 
 
@@ -155,25 +145,25 @@ class Country():
 		self.managerID = ctx.message.author.id
 		#create country category
 		self.channelNames = re.sub('[^A-Za-z0-9 ]+', '', self.name.lower()).replace(" ", "-")
-		
+
 		self.categoryName = name
 		asyncio.run(aClassInitCategory(ctx, name, self))
-		
+
 		#Make a country role
-		
+
 		self.roleName = name
 		asyncio.run(aClassInitRoleCreate(ctx, name))
 		asyncio.run(aClassInitRoleAdd(ctx, name, self))
-		
+
 		#make a private chair DM
-		
+
 		chair = get(ctx.message.guild.categories, name='chair')
-		
+
 		self.chairChannelName = self.channelNames + "-chair"
 		asyncio.run(aClassInitChairChannel(ctx, name, chair, self))
-		
+
 		asyncio.run(aClassInitChairPerms(ctx, name, self))
-		
+
 		#randomly assign base stats
 		#Population
 		#-Education
@@ -205,7 +195,7 @@ class Country():
 		"""
 		#8 OG, using other to cut uranium for now
 		stats = [1, 2, 4, 5, 5, 5, 8, 10]
-		
+
 		statsEdit = [1, 2, 4, 5, 5, 8, 10]
 
 		def yoink(stat):
@@ -235,7 +225,7 @@ class Country():
 		self.lumber = 0
 
 		self.ore = 0
-		
+
 		#self.uranium = 0
 
 		self.wealth = 10
@@ -267,7 +257,7 @@ class Country():
 		self.food_deficit = 0
 
 		self.starvation_time = 0
-		
+
 		#self.army_size = 0
 
 		#self.combat_power = 0
