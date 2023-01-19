@@ -1,16 +1,21 @@
+import nest_asyncio
+
 import discord
 import pickle
 import asyncio
-import nest_asyncio
+
+from Commands import *
+
 # from random import randint
 from random import choice
 import re
 from datetime import datetime
-
-nest_asyncio.apply()
 from discord.utils import get
 from discord.ext import commands
-intents = discord.Intents.default()
+
+nest_asyncio.apply()
+
+intents = discord.Intents.all()
 intents.members = True
 intents.messages = True
 client = commands.Bot(command_prefix=".", intents = intents)
@@ -29,9 +34,13 @@ BRAINSTORM
 """
 # Do stuff when a time unit passes
 async def timeUnit():
-	pass
-
+	with open('src/pickle/Countries', 'rb') as ctry:
+		Countries = pickle.load(ctry)
+	for target in Countries:
+		await target.timeUnitC()
+	save_object(Countries, "src/pickle/Countries")
 pass
+
 # when the bot is ready
 # Used to run the time loop
 @client.event
@@ -47,9 +56,13 @@ async def on_ready():
 		t = tme.strftime("%X")
 		if i%5 == 0:
 			print(t)
+		if i%15 == 0:
+			#await botChannel.send("One time unit has passed!")
+			print("One time unit has passed!")
+			await timeUnit()
 		#midnight is 07:00:00
-		if t == "00:8:00":
-			await botChannel.send("One time unit has passed!")
+		if t == "20:8:00":
+			#await botChannel.send("One time unit has passed!")
 			await timeUnit()
 		await asyncio.sleep(1)
 		i+=1
@@ -63,8 +76,8 @@ def save_object(obj, filename):
 
 
 Countries = []
-#save_object(Countries, "Countries")
-# Countries = pickle.load("Countries")
+#save_object(Countries, "src/pickle/Countries")
+# Countries = pickle.load("src/pickle/Countries")
 
 #@client.event
 #async def on_message(message):
@@ -82,7 +95,10 @@ async def help(ctx):
 	embedVar.add_field(name="Create Country (.cc)", value="Creates a country", inline=False)
 	embedVar.add_field(name="Statistics (.s)", value="Check your country statistics", inline=False)
 	embedVar.add_field(name="Technology (.t)", value="Check your technological progression", inline=False)
+	embedVar.add_field(name="Research (.r <tech>)", value="Research a specified tech", inline=False)
+	embedVar.add_field(name="Actions (.a)", value="Preform country actions", inline=False)
 	embedVar.add_field(name="Message (.m <country>)", value="Send a private message to anoter country", inline=False)
+
 	await ctx.send(embed=embedVar)
 
 
@@ -187,38 +203,40 @@ class Country():
 		army (specifics TBD)
 		tech
 		"""
-		#8
+		#8 OG, using other to cut uranium for now
 		stats = [1, 2, 4, 5, 5, 5, 8, 10]
+		
+		statsEdit = [1, 2, 4, 5, 5, 8, 10]
 
 		def yoink(stat):
-			global stats
+			global statsEdit
 			e = choice(stat)
-			stats = stat.remove(e)
-			return e
+			statsEdit = stat.remove(e)
+			return int(e)
 
-		self.land_size = yoink(stats)
+		self.land_size = yoink(statsEdit)
 
-		self.standard_of_living = yoink(stats)
+		self.standard_of_living = yoink(statsEdit)
 
-		self.land_lumber = yoink(stats)
+		self.land_lumber = yoink(statsEdit)
 
-		self.land_ore = yoink(stats)
+		self.land_ore = yoink(statsEdit)
 
-		self.land_uranium = yoink(stats)
+		#self.land_uranium = yoink(stats)
 
-		self.land_fertility = yoink(stats)
+		self.land_fertility = yoink(statsEdit)
 
-		self.population = (1000000 * self.land_size) / (self.standard_of_living/2)
+		self.population = int(self.land_size / (self.standard_of_living/5))
 		#NOTE: add birth and death rates later
-		self.education = yoink(stats)
+		self.education = yoink(statsEdit)
 
-		self.nationalism = yoink(stats)
+		self.nationalism = yoink(statsEdit)
 
 		self.lumber = 0
 
 		self.ore = 0
-
-		self.uranium = 0
+		
+		#self.uranium = 0
 
 		self.wealth = 10
 		#note: come up with equation for income
@@ -228,13 +246,28 @@ class Country():
 
 		self.tech = [
 			#also remember commas, dumbass
-			#Name, %of completion, cost
-			["Mine", 0, 1000],
-			["Lumber Mill", 0, 1000],
-			["Agriculture", 0, 1000],
-			["Animal Husbandry", 0, 1000]
+			#Name, in Progress?, time in development, duration (in time units), cost, is Complete
+
+			# My dumbass forgot to add a "is complete", but all you gotta do is if [2] >= [3] return true
+			# ignore that imma add it
+			["Mine", False, 0, 5, 1000, False],
+			["Lumber Mill", False, 0, 5, 1000, False],
+			["Agriculture", False, 0, 5, 1000, False],
+			["Animal Husbandry", False, 0, 5, 1000, False]
 		]
-			
+
+		self.infrastructure = [
+			# Name, quantity (scale of 1-10), Quality?, Linked Tech (Put tech name) put "None" if no tech is required), Cost per unit
+			["Mines", 0, 1, "Mine", 1000],
+			["Lumber Mills", 0, 1, "Lumber Mill", 1000],
+			["Farms", 1, 1, "Agriculture", 1000],
+			["Ranches", 1, 1, "Animal Husbandry", 1000]
+		]
+
+		self.food_deficit = 0
+
+		self.starvation_time = 0
+		
 		#self.army_size = 0
 
 		#self.combat_power = 0
@@ -245,16 +278,26 @@ class Country():
 		#self.tech = [
 		#	("pottery", False)
 		#]
-		# NOTE TO SELF DELETE COUNTRIES WHEN THEIR OWNER LEAVES THE SERVER
+		# TODO NOTE TO SELF DELETE COUNTRIES WHEN THEIR OWNER LEAVES THE SERVER
 	async def techTree(self, ctx):
 		embedVar = discord.Embed(title=f"{self.name} Tech", description="Country technologies", color= 0xe74c3c)
-		for i, techno in enumerate(self.tech):
-			if techno[1] > 0 and techno[1] < 1:
-				embedVar.add_field(name=techno[0], value="In Progress", inline=False)
-			elif techno[1] == 0:
-				embedVar.add_field(name=techno[0], value="Unresearched", inline=False)
-			elif techno[1] == 1:
-				embedVar.add_field(name=techno[0], value="Completed", inline=False)
+		print(self.tech)
+		for techno in self.tech:
+			if techno[1] == True:
+				thng = ":green_square: "
+				embedVar.add_field(name=thng + techno[0], value=f"{int(techno[2]/techno[3] * 100)}% completed", inline=False)
+			elif techno[3] > techno[2] > 0:
+				thng = ":yellow_square: "
+				embedVar.add_field(name=thng + " " + techno[0], value=f"{int(techno[2]/techno[3] * 100)}% completed", inline=False)
+			elif techno[2] == 0:
+				thng = ":arrow_right: "
+				embedVar.add_field(name=thng + techno[0], value="Unresearched", inline=False)
+			elif techno[5]:
+				thng = ":white_check_mark: "
+				embedVar.add_field(name=thng + techno[0], value="Completed", inline=False)
+			else:
+				thng = ":exclamation: "
+				embedVar.add_field(name=thng + techno[0], value="Look the code broke, I'm sorry my guy", inline=False)
 		await ctx.send(embed=embedVar)
 		
 	async def getStats(self, ctx):
@@ -262,7 +305,7 @@ class Country():
 		embedVar.add_field(name=str(self.land_size), value="Land Size", inline=True)
 		embedVar.add_field(name=str(self.land_lumber), value="Land Lumber", inline=True)
 		embedVar.add_field(name=str(self.land_ore), value="Land Ore", inline=True)
-		embedVar.add_field(name=str(self.land_uranium), value="Land Uranium", inline=True)
+		#embedVar.add_field(name=str(self.land_uranium), value="Land Uranium", inline=True)
 		embedVar.add_field(name=str(self.land_fertility), value="Soil Fertility", inline=True)
 		embedVar.add_field(name=str(self.standard_of_living), value="Standard of Living", inline=True)
 		embedVar.add_field(name=str(self.nationalism), value="Nationalism", inline=True)
@@ -272,15 +315,96 @@ class Country():
 		embedVar.add_field(name=str(self.population), value="Population", inline=True)
 		embedVar.add_field(name=str(self.lumber), value="Lumber", inline=True)
 		embedVar.add_field(name=str(self.ore), value="Ore", inline=True)
-		embedVar.add_field(name=str(self.uranium), value="Uranium", inline=True)
+		#embedVar.add_field(name=str(self.uranium), value="Uranium", inline=True)
 		embedVar.add_field(name=str(self.food), value="Food", inline=True)
 		await ctx.send(embed=embedVar)
+		
+		embedVar = discord.Embed(title=f"{self.name} Infrastructure", description="Country infrastructure", color= 0xe74c3c)
+		i = 0
+		for item in self.infrastructure:
+			for itemm in self.tech:
+				if itemm[0] == item[3] and itemm[5]:
+					i +=1
+					embedVar.add_field(name=item[0], value="Stats", inline=False)
+					embedVar.add_field(name=str(item[1]), value="Number of " + item[0], inline=True)
+					embedVar.add_field(name=str(item[2]), value="Quality of " + item[0], inline=True)
+		if i != 0:
+			await ctx.send(embed=embedVar)
+
+		i = 0
+		embedVar = discord.Embed(title=f"{self.name} Tech", description="Country Technology",color=0xe74c3c)
+		for techno in self.tech:
+			if techno[2] >= techno[3]:
+				i += 1
+				embedVar.add_field(name=techno[0], value="Researched", inline=False)
+			elif techno[1]:
+				i += 1
+				embedVar.add_field(name=techno[0], value="In Progress", inline=False)
+
+		if i != 0:
+			await ctx.send(embed=embedVar)
 
 
+	async def timeUnitC(self):
+		#advance tech
+		#TODO: do cost stuff here
+		for item in self.tech:
+			# if in progress
+			if item[1]:
+				# Progress research
+				item[2] += 1
+				# if research complete
+				if item[2] >= item[3]:
+					# set in progress to false
+					item[1] = False
+					item[5] = True
+					print(item[0] + " completed!")
 
+					# Check if tech is a prerequisite for a building,
+					#!depreciated
+					"""for itemm in self.infrastructure:
+						if itemm[3].lower() == item[0].lower():
+							itemm[4] = True"""
+		# Generate resources
+		# HARD CODED
+		for item in self.infrastructure:
+			if item[1] > 0:
+				if item[0] == "Mines":
+					# Equation: Ore amount = Stat * Number of items * Quality
+					self.ore += int(((self.land_ore * item[1])//2) * item[2])
+					
+				if item[0] == "Lumber Mills":
+					# Equation: Lumber amount = Stat * Number of items * Quality
+					self.lumber += int(((self.land_lumber * item[1])//2) * item[2])
 
+				if item[0] == "Farms":
+					# Equation: Food amount = Stat * Number of items * Quality
+					self.food += int(((self.land_fertility * item[1])//2) * item[2])
 
-pass
+				if item[0] == "Ranches":
+					# Equation: Food amount = Constant * Number of items * Quality
+					self.food += int(((4 * item[1])//2) * item[2])
+
+		#population increase
+		self.population += 1
+		
+		#Food Subtraction
+		self.food -= self.population * (self.standard_of_living // 2)
+		
+		if self.food < 0:
+			
+			self.food_deficit = 0 - self.food
+			self.food = 0
+			self.starvation_time += 1
+			
+			if self.starvation_time >= 3:
+				self.population -= self.food_deficit // 2
+		else:
+			self.starvation_time = 0
+			# Later, update to give a time buffer between deficit beginning and starvation
+				#save_object(Countries, "src/pickle/Countries")
+				
+			# Leaving possibility for more than 1 tech in development
 
 # Clear command
 @client.command(aliases=["clr333"])
@@ -300,10 +424,10 @@ async def clear333(ctx):
 	clrOption = clrOption.content
 	
 	if clrOption == "1":
-		with open('Countries', 'rb') as ctry:
+		with open('src/pickle/Countries', 'rb') as ctry:
 			Countries = pickle.load(ctry)
 		Countries = []
-		save_object(Countries, "Countries")
+		save_object(Countries, "src/pickle/Countries")
 		await ctx.send("Cleared!")
 	elif clrOption == "2":
 		chair = get(ctx.message.guild.categories, name='chair')
@@ -359,7 +483,7 @@ async def clear333(ctx):
 			await ctx.send("Cancelled.")
 	elif clrOption == "5":
 		ctrys = []
-		with open('Countries', 'rb') as ctry:
+		with open('src/pickle/Countries', 'rb') as ctry:
 			Countries = pickle.load(ctry)
 		for i in Countries:
 			ctrys.append(i.name)
@@ -379,7 +503,7 @@ async def clear333(ctx):
 					target = i
 			if confi == "y":
 				Countries.remove(target)
-				save_object(Countries, "Countries")
+				save_object(Countries, "src/pickle/Countries")
 				
 				chair = get(ctx.message.guild.categories, name='chair')
 				for i in chair.channels:
@@ -435,16 +559,12 @@ async def clear333(ctx):
 				for i in chnls:
 					await i.delete()
 				await ctx.send("Complete")
-			
-			
-				
 
-pass
 
 # Create a new country
 @client.command(aliases=["cc"])
 async def createCountry(ctx):
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	await ctx.send(Countries)
 	for country in Countries:
@@ -479,18 +599,15 @@ async def createCountry(ctx):
 	countre = Country(ctx, name.content)
 	Countries.append(countre)
 	await ctx.send(Countries)
-	save_object(Countries, "Countries")
+	save_object(Countries, "src/pickle/Countries")
 
 
-
-
-pass
 
 # Get country stats
 @client.command(aliases=["s"])
 async def stats(ctx):
 	target = None
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	for i in Countries:
 		if ctx.message.author.id == i.managerID:
@@ -501,15 +618,12 @@ async def stats(ctx):
 		await target.getStats(ctx)
 
 
-
-pass
-
 # Get tech details
 @client.command(aliases=["t", "tech"])
 async def technology(ctx, *, arg=None):
 	
 	target = None
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 	for i in Countries:
 		if ctx.message.author.id == i.managerID:
@@ -527,14 +641,14 @@ async def technology(ctx, *, arg=None):
 			
 			embedVar = discord.Embed(title=f"Mine", description="Tech details", color= 0xe74c3c)
 			embedVar.add_field(name="Allows the mining of ore", value="Effects", inline=False)
-			embedVar.add_field(name="$" + str(target.tech[0][2] ), value="Tech cost (per time unit)", inline=False)
+			embedVar.add_field(name="$" + str(target.tech[0][4] ), value="Tech cost (per time unit)", inline=False)
 			await ctx.send(embed=embedVar)
 			
 		if arg.lower() == "lumber mill":
 			
 			embedVar = discord.Embed(title=f"Lumber Mill", description="Tech details", color= 0xe74c3c)
 			embedVar.add_field(name="Allows the collection of lumber", value="Effects", inline=False)
-			embedVar.add_field(name="$"+str(target.tech[1][2]), value="Tech cost (per time unit)", inline=False)
+			embedVar.add_field(name="$"+str(target.tech[1][4]), value="Tech cost (per time unit)", inline=False)
 			await ctx.send(embed=embedVar)
 			
 			
@@ -542,14 +656,14 @@ async def technology(ctx, *, arg=None):
 			
 			embedVar = discord.Embed(title=f"Agriculture", description="Tech details", color= 0xe74c3c)
 			embedVar.add_field(name="Allows the harvesting of food", value="Effects", inline=False)
-			embedVar.add_field(name="$"+str(target.tech[2][2]), value="Tech cost (per time unit)", inline=False)
+			embedVar.add_field(name="$"+str(target.tech[2][4]), value="Tech cost (per time unit)", inline=False)
 			await ctx.send(embed=embedVar)
 			
 		if arg.lower() == "animal husbandry":
 			
 			embedVar = discord.Embed(title=f"Animal Husbandry", description="Tech details", color= 0xe74c3c)
 			embedVar.add_field(name="Allows the domestication of animals for food", value="Effects", inline=False)
-			embedVar.add_field(name="$"+str(target.tech[3][2]), value="Tech cost (per time unit)", inline=False)
+			embedVar.add_field(name="$"+str(target.tech[3][4]), value="Tech cost (per time unit)", inline=False)
 			await ctx.send(embed=embedVar)
 			
 		###ADD MORE TECHS HERE###
@@ -561,17 +675,148 @@ pass
 # research techs
 @client.command(aliases=["r"])
 async def research(ctx, *, arg=None):
-	if arg == None:
-		pass
 
+	target = None
+	with open('src/pickle/Countries', 'rb') as ctry:
+		Countries = pickle.load(ctry)
+	for i in Countries:
+		if ctx.message.author.id == i.managerID:
+			target = i
+			break
 	
+	if arg == None:
+		await ctx.send("Please specify a tech")
+		await ctx.send("Use `.tech` to check your options")
+		return
+
+	tech = None
+	prev = None
+	for i in target.tech:
+		if i[1] == True:
+			prev = i
+			await ctx.send(f"Switching research from {i[0]} to {arg}!")
+
+			
+	for i in target.tech:
+		if i[0].lower() == arg.lower():
+			if i[1] == False and i[2] <= i[3]:
+				await ctx.send(f"Researching {i[0]}!")
+				tech = i
+				break
+			elif i[1] == True:
+				await ctx.send(f"Research on {i[0]} is already in progress!")
+				return
+			elif i[2] >= i[3]:
+				await ctx.send(f"Research on {i[0]} Has already been completed!")
+				return
+			else:
+				await ctx.send(f"a̵̲̲̪̘̹̜̔̍͂á̵̢̛͇̹͙̭̩̰̯̱̰̘̘͓̬͛̐̂̓̑̆͒͘͘͜a̵̢̛̯̘͚̞̦̱͕̞̻̓̀͆̈́̈́͑̎͛͘̚͝ă̶̳̰͋̄͋͋̿̔̒̇͘̚̚͠͠a̷̖̭̪̬͉͇̗̗̘͉͔̝͒̽͐͋͗ͅa̵̘͙̯̥̻͒͜ͅâ̷̗̥̘̱̯̤̬̪̓̄͊͋ͅa̴̬̲̓̅̔̑̉͜a̶͎̹̼̜͉̥̞͔͍͖̯̫͐̂̀̂̚̚͜ͅā̶̛̛͚͍̫̹̯̟̗̻̩́̓̎͒͜ͅą̸͇̩͇͎͑͠a̷̧̛͈̘̦à̵̛̰̝̭̀̎́́͒̔̀̔ã̴̠͚͐̒͆̀̒̀̒͗̏̿̿͠͝a̶̱̳̯͍̜̫̣̿̾̿͊̏̒̈́̚͝a̵̦̜̘͍̰̘̹̗͋̓̓͂̄͌á̸̧̼̥͚̻̞͈̮͖̲̈̍́̆͗͘ȃ̸̢̹̩̺̙͚ą̷̜̻͊̅͋̒͜ặ̶͇̘̯̀ǎ̵̝͍̱̖̳̻̯̀̃̑́̃͗̕͠͝a̵͕̱̩͇̼̻̜̦͇̥͊̾͊̇̏͘ͅà̴̤͓̫̳͎̭̾̊̚a̸̡̝̙̹̬̠̅̓̈́͌͛̓̀͐͘ͅa̷̜͕̖̪̹̺̝̲̹̟͈͎̾̀̚a̴̧̡̨̞͇͚̗̗̬̦͔͓̦̺͋̑̾͜ä̷̢̛̪̗̜̮̝͇͕̞́̏̆͠͠ͅ")
+				return
+				
+	
+	if tech == None:
+		await ctx.send(f"{arg} not found")
+		return
+		
+	if prev != None:
+		prev[1] = False
+		
+	tech[1] = True
+	save_object(Countries, "src/pickle/Countries")
+
+
+# get actions
+@client.command(aliases=["a"])
+async def actions(ctx):
+	
+	with open('src/pickle/Countries', 'rb') as ctry:
+		Countries = pickle.load(ctry)
+	target = None
+	for i in Countries:
+		if ctx.message.author.id == i.managerID:
+			target = i
+			break
+	if target == None:
+		return
+	
+	embedVar = discord.Embed(title=f"{target.name} Actions", description="Country Actions", color= 0xe74c3c)
+	embedVar.add_field(name="1) Build Infrastructure", value="Construct or improve crucial infrastructure", inline=False)
+	embedVar.add_field(name="2) Budget Allocation", value="INCOMPLETE", inline=False)
+	await ctx.send(embed=embedVar)
+
+	await ctx.send("Please provide the corresponding number for the option you wish to select")
+	
+	def check(m):
+		return m.channel == ctx.message.channel and m.author == ctx.message.author
+	aChoice = await client.wait_for('message', check=check)
+	print(aChoice.content)
+	if aChoice.content == "1":
+		embedVar = discord.Embed(title=f"{target.name} Infrastructure", description="Country Infrastructure", color= 0xe74c3c)
+		fields = 0
+		for i, item in enumerate(target.infrastructure):
+			# TODO: add tech descriptors to list and implement here
+
+			for itemm in target.tech:
+
+				if item[3] == itemm[0] and itemm[5]:
+					fields += 1
+					embedVar.add_field(name=f"{i+1}) Build {item[0]}", value=f"cost = {item[4]}", inline=False)
+		if fields == 0:
+			await ctx.send("No infrastructure found. Try researching some tech.")
+			return
+			
+		await ctx.send(embed=embedVar)
+
+		await ctx.send("Please provide the corresponding number for the option you wish to select")
+	
+		def check(m):
+			return m.channel == ctx.message.channel and m.author == ctx.message.author
+		iChoice = await client.wait_for('message', check=check)
+		
+		for i, item in enumerate(target.infrastructure):
+			if str(i+1) == iChoice.content:
+				#cost stuff that I have yet to implement
+				await ctx.send("How many do you wish to purchase? Max is 10, Min is 1. Type 'quit' to quit.")
+	
+				def check(m):
+					return m.channel == ctx.message.channel and m.author == ctx.message.author
+				numChoice = await client.wait_for('message', check=check)
+				numChoice = numChoice.content
+				if numChoice == "quit":
+					await ctx.send("Quit Process.")
+					return
+				try:
+					numChoice = int(numChoice)
+				except TypeError:
+					await ctx.send("Ur dumb. Give me a number, knucklehead.")
+					return
+				
+				if numChoice > 10:
+					numChoice = 10
+				elif numChoice == 0:
+					await ctx.send("Quit Process.")
+					return
+				elif numChoice < 1:
+					numChoice = 1
+
+				if item[1] + numChoice > 10:
+					numChoice = 10 - item[1]
+					
+				item[1] += numChoice
+				save_object(Countries, "src/pickle/Countries")
+
+				await ctx.send(f"{numChoice} {item[0]} purchased!")
+				
+				if numChoice == 1:
+					await ctx.send(f"Plurals are a pain in the ass to code, fuck you.")
+
 pass
 
 # Message another country
 @client.command(aliases=["m"])
 async def message(ctx, args=None):
 	
-	with open('Countries', 'rb') as ctry:
+	with open('src/pickle/Countries', 'rb') as ctry:
 		Countries = pickle.load(ctry)
 		
 	options = []
@@ -681,12 +926,12 @@ async def crisisOpt(ctx):
 	embed.add_field(name='Reported By', value="g", inline=False)
 	await ctx.send(embed=embed)
 
-#token = "sugondese nutz"
+#token = "your mother"
 #save_object(token, "token.p")
 
 	
 pass
-
-#Run
-token = pickle.load(open("token.p", "rb"))
-client.run(token)
+if __name__ == "__main__":
+	#Run
+	token = pickle.load(open("src/pickle/token.p", "rb"))
+	client.run(token)
