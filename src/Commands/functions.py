@@ -10,6 +10,8 @@ def save_object(obj, filename):
         pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
 
 
+# ####################### Clear Functions ###########################
+
 async def clr(ctx, client):
     embedVar = discord.Embed(title="Clear", description="Clear Menu", color=0xe74c3c)
     embedVar.add_field(name="1- Countries", value="Clear the countries list", inline=False)
@@ -27,145 +29,171 @@ async def clr(ctx, client):
     clrOption = clrOption.content
 
     if clrOption == "1":
-        with open('src/pickle/Countries', 'rb') as ctry:
-            Countries = pickle.load(ctry)
-        Countries = []
-        save_object(Countries, "src/pickle/Countries")
-        await ctx.send("Cleared!")
+        await clrCList(ctx)
     elif clrOption == "2":
-        chair = get(ctx.message.guild.categories, name='chair')
-        if len(chair.channels) >= 1:
-            for chan in chair.channels:
-                await chan.delete()
-            await ctx.send("Complete!")
-        else:
-            await ctx.send("Error: No channels found")
+        await clrCChannels(ctx)
     elif clrOption == "3":
-        whitelist = ["mmun", "text channels", "chair"]
-        death = ctx.guild.categories
-        await ctx.send(f"Whitelist: {whitelist}\n\nPLEASE CONFIRM OR EDIT CODE. CAPS MATTER.")
-
-        def check(m):
-            return m.channel == ctx.message.channel and m.author == ctx.message.author
-
-        confirm = await client.wait_for('message', check=check)
-        await confirm.delete()
-        confirm = confirm.content
-
-        if confirm == "wednesday":
-            for cat in death:
-                if cat.name in whitelist:
-                    print(f"saved {cat.name}")
-                else:
-                    for channel in cat.channels:
-                        await channel.delete()
-                    await cat.delete()
-                    print(f"killed {cat.name}")
-
-            await ctx.send("Complete!")
-        else:
-            await ctx.send("Cancelled.")
+        await clrCategories(ctx, client)
     elif clrOption == "4":
-        whitelist = ["Chair", "Programmer", "Tester", "Bot", "MMUN Bot"]
-        death = ctx.guild.roles
-        await ctx.send(f"Whitelist: {whitelist}\n\nPLEASE CONFIRM OR EDIT CODE. CAPS MATTER.")
-
-        def check(m):
-            return m.channel == ctx.message.channel and m.author == ctx.message.author
-
-        confirm = await client.wait_for('message', check=check)
-        await confirm.delete()
-        confirm = confirm.content
-
-        if confirm == "thursday":
-            for rle in death:
-                if rle.name in whitelist or rle.name == "@everyone":
-                    print(f"saved {rle.name}")
-                else:
-                    await rle.delete()
-                    print(f"killed {rle.name}")
-
-            await ctx.send("Complete!")
-        else:
-            await ctx.send("Cancelled.")
+        await clrRoles(ctx, client)
     elif clrOption == "5":
-        ctrys = []
-        with open('src/pickle/Countries', 'rb') as ctry:
-            Countries = pickle.load(ctry)
-        for i in Countries:
-            ctrys.append(i.name)
+        await clrSpecCountry(ctx, client)
+    elif clrOption == "6":
+        await clrEmptyChnls(ctx, client)
 
-        await ctx.send(f"Select a country: \n{ctrys}")
+
+async def clrCList(ctx):
+    with open('src/pickle/Countries', 'rb') as ctry:
+        Countries = pickle.load(ctry)
+    Countries = []
+    save_object(Countries, "src/pickle/Countries")
+    await ctx.send("Cleared!")
+
+
+async def clrCChannels(ctx):
+    chair = get(ctx.message.guild.categories, name='chair')
+    if len(chair.channels) >= 1:
+        for chan in chair.channels:
+            await chan.delete()
+        await ctx.send("Complete!")
+    else:
+        await ctx.send("Error: No channels found")
+
+
+async def clrCategories(ctx, client):
+    whitelist = ["mmun", "text channels", "chair"]
+    death = ctx.guild.categories
+    await ctx.send(f"Whitelist: {whitelist}\n\nPLEASE CONFIRM OR EDIT CODE. CAPS MATTER.")
+
+    def check(m):
+        return m.channel == ctx.message.channel and m.author == ctx.message.author
+
+    confirm = await client.wait_for('message', check=check)
+    await confirm.delete()
+    confirm = confirm.content
+
+    if confirm == "wednesday":
+        for cat in death:
+            if cat.name in whitelist:
+                print(f"saved {cat.name}")
+            else:
+                for channel in cat.channels:
+                    await channel.delete()
+                await cat.delete()
+                print(f"killed {cat.name}")
+
+        await ctx.send("Complete!")
+    else:
+        await ctx.send("Cancelled.")
+
+
+async def clrRoles(ctx, client):
+    whitelist = ["Chair", "Programmer", "Tester", "Bot", "MMUN Bot"]
+    death = ctx.guild.roles
+    await ctx.send(f"Whitelist: {whitelist}\n\nPLEASE CONFIRM OR EDIT CODE. CAPS MATTER.")
+
+    def check(m):
+        return m.channel == ctx.message.channel and m.author == ctx.message.author
+
+    confirm = await client.wait_for('message', check=check)
+    await confirm.delete()
+    confirm = confirm.content
+
+    if confirm == "thursday":
+        for rle in death:
+            if rle.name in whitelist or rle.name == "@everyone":
+                print(f"saved {rle.name}")
+            else:
+                await rle.delete()
+                print(f"killed {rle.name}")
+
+        await ctx.send("Complete!")
+    else:
+        await ctx.send("Cancelled.")
+
+
+async def clrSpecCountry(ctx, client):
+    ctrys = []
+    with open('src/pickle/Countries', 'rb') as ctry:
+        Countries = pickle.load(ctry)
+    for i in Countries:
+        ctrys.append(i.name)
+
+    await ctx.send(f"Select a country: \n{ctrys}")
+
+    def check(m):
+        return m.channel == ctx.message.channel and m.author == ctx.message.author
+
+    confirm = await client.wait_for('message', check=check)
+    confirmC = confirm.content
+    if confirmC in ctrys:
+        await ctx.send(f"Delete {confirmC}? (y/n)")
+        confi = await client.wait_for('message', check=check)
+        confi = confi.content
+        for i in Countries:
+            if i.name == confirmC:
+                target = i
+        if confi == "y":
+            Countries.remove(target)
+            save_object(Countries, "src/pickle/Countries")
+
+            chair = get(ctx.message.guild.categories, name='chair')
+            for i in chair.channels:
+                if i.name == target.chairChannelName:
+                    await i.delete()
+
+            cat = get(ctx.guild.categories, name=target.categoryName)
+
+            if cat != None:
+                for channel in cat.channels:
+                    await channel.delete()
+                await cat.delete()
+            else:
+                pass
+            # await ctx.send(f"Cancelled.")
+
+            rle = get(ctx.guild.roles, name=target.roleName)
+            if rle != None:
+                await rle.delete()
+            else:
+                pass
+            # await ctx.send(f"Cancelled.")
+            await ctx.send("Complete!")
+            return
+        else:
+            await ctx.send(f"Cancelled.")
+            return
+    else:
+        await ctx.send(f"{confirmC} not found. Please try again.")
+        return
+
+
+async def clrEmptyChnls(ctx, client):
+    whitelist = ["mmun", "text channels", "chair"]
+    chnls = []
+    for i in ctx.guild.channels:
+        if i.name not in whitelist:
+            name = i.category
+            if name == None:
+                name = "None"
+                chnls.append(i)
+            else:
+                name = name.name
+            print(i.name + "- " + name)
+    if len(chnls) == 0:
+        return
+    else:
+        for i in chnls:
+            await ctx.send(i.name)
+        await ctx.send("Do you want to delete the above channels? (y/n)")
 
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.message.author
 
-        confirm = await client.wait_for('message', check=check)
-        confirmC = confirm.content
-        if confirmC in ctrys:
-            await ctx.send(f"Delete {confirmC}? (y/n)")
-            confi = await client.wait_for('message', check=check)
-            confi = confi.content
-            for i in Countries:
-                if i.name == confirmC:
-                    target = i
-            if confi == "y":
-                Countries.remove(target)
-                save_object(Countries, "src/pickle/Countries")
-
-                chair = get(ctx.message.guild.categories, name='chair')
-                for i in chair.channels:
-                    if i.name == target.chairChannelName:
-                        await i.delete()
-
-                cat = get(ctx.guild.categories, name=target.categoryName)
-
-                if cat != None:
-                    for channel in cat.channels:
-                        await channel.delete()
-                    await cat.delete()
-                else:
-                    pass
-                # await ctx.send(f"Cancelled.")
-
-                rle = get(ctx.guild.roles, name=target.roleName)
-                if rle != None:
-                    await rle.delete()
-                else:
-                    pass
-                # await ctx.send(f"Cancelled.")
-                await ctx.send("Complete!")
-                return
-            else:
-                await ctx.send(f"Cancelled.")
-                return
-        else:
-            await ctx.send(f"{confirmC} not found. Please try again.")
-            return
-    elif clrOption == "6":
-        whitelist = ["mmun", "text channels", "chair"]
-        chnls = []
-        for i in ctx.guild.channels:
-            if i.name not in whitelist:
-                name = i.category
-                if name == None:
-                    name = "None"
-                    chnls.append(i)
-                else:
-                    name = name.name
-                print(i.name + "- " + name)
-        if len(chnls) == 0:
-            return
-        else:
+        confi = await client.wait_for('message', check=check)
+        if confi.content == "y":
             for i in chnls:
-                await ctx.send(i.name)
-            await ctx.send("Do you want to delete the above channels? (y/n)")
+                await i.delete()
+            await ctx.send("Complete")
 
-            def check(m):
-                return m.channel == ctx.message.channel and m.author == ctx.message.author
-
-            confi = await client.wait_for('message', check=check)
-            if confi.content == "y":
-                for i in chnls:
-                    await i.delete()
-                await ctx.send("Complete")
+# ####################### Clear Functions ###########################

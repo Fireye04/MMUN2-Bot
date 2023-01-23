@@ -5,7 +5,6 @@ from random import choice
 
 import nest_asyncio
 from discord.ext import commands
-from discord.utils import get
 
 import pickle
 from Commands.countryIntel import *
@@ -42,9 +41,6 @@ async def timeUnit():
     save_object(Countries, "src/pickle/Countries")
 
 
-pass
-
-
 # when the bot is ready
 # Used to run the time loop
 @client.event
@@ -72,7 +68,7 @@ async def on_ready():
         i += 1
 
 
-Countries = []
+# Countries = []
 
 
 # save_object(Countries, "src/pickle/Countries")
@@ -123,13 +119,10 @@ async def aClassInitChairPerms(ctx, name, self):
     return
 
 
-pass
-
-
 ########CLASS INIT#########
 
 # Country class declaration
-class Country():
+class Country:
     # on country creation, add government later
     # Note to self, check for duplicates, or previously owned countries
     def __init__(self, ctx, name):
@@ -186,7 +179,7 @@ class Country():
         tech
         """
         # 8 OG, using other to cut uranium for now
-        stats = [1, 2, 4, 5, 5, 5, 8, 10]
+        # stats = [1, 2, 4, 5, 5, 5, 8, 10]
 
         statsEdit = [1, 2, 4, 5, 5, 8, 10]
 
@@ -239,7 +232,8 @@ class Country():
         ]
 
         self.infrastructure = [
-            # Name, quantity (scale of 1-10), Quality?, Linked Tech (Put tech name) put "None" if no tech is required), Cost per unit
+            # Name, quantity (scale of 1-10), Quality?, Linked Tech (Put tech name) put "None" if no tech is
+            # required), Cost per unit
             ["Mines", 0, 1, "Mine", 1000],
             ["Lumber Mills", 0, 1, "Lumber Mill", 1000],
             ["Farms", 1, 1, "Agriculture", 1000],
@@ -265,7 +259,7 @@ class Country():
         embedVar = discord.Embed(title=f"{self.name} Tech", description="Country technologies", color=0xe74c3c)
         print(self.tech)
         for techno in self.tech:
-            if techno[1] == True:
+            if techno[1]:
                 thng = ":green_square: "
                 embedVar.add_field(name=thng + techno[0], value=f"{int(techno[2] / techno[3] * 100)}% completed",
                                    inline=False)
@@ -407,9 +401,9 @@ async def createCountry(ctx):
     for country in Countries:
         if country.managerID == ctx.message.author.id:
             await ctx.send(
-                f"Looks like you already own {country.name}! Please delete it before making a new country! (Delete feature in progress)")
+                f"Looks like you already own {country.name}! Please delete it before making a new country! (Delete "
+                f"feature in progress)")
             return
-            break
 
     await ctx.send("Country Creation process initiated!")
 
@@ -424,14 +418,15 @@ async def createCountry(ctx):
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.message.author
 
-        name = await client.wait_for('message', check=check)
-        if name == "quit" or name == "exit":
+        nameI = await client.wait_for('message', check=check)
+        if nameI == "quit" or nameI == "exit":
             return "quit"
-        for country in Countries:
-            if name.content == country.name:
+        for countryy in Countries:
+            if nameI.content == countryy.name:
                 await ctx.send(
-                    f"Looks like that country has already been taken by {country.manager.mention}! Try chosing a different name!")
-        return name
+                    f"Looks like that country has already been taken by {countryy.manager.mention}! Try choosing a "
+                    f"different name!")
+        return nameI
 
     name = await nameCountry()
     if name == "quit":
@@ -453,7 +448,7 @@ async def stats(ctx):
             target = i
             break
     print(target)
-    if target != None:
+    if target is not None:
         await target.getStats(ctx)
 
 
@@ -480,7 +475,7 @@ async def actions(ctx):
         if ctx.message.author.id == i.managerID:
             target = i
             break
-    if target == None:
+    if target is None:
         return
 
     embedVar = discord.Embed(title=f"{target.name} Actions", description="Country Actions", color=0xe74c3c)
@@ -560,9 +555,6 @@ async def actions(ctx):
                     await ctx.send(f"Plurals are a pain in the ass to code, fuck you.")
 
 
-pass
-
-
 # Message another country
 @client.command(aliases=["m"])
 async def message(ctx, args=None):
@@ -579,11 +571,11 @@ async def message(ctx, args=None):
             userC = i
             break
 
-    if userC == None:
+    if userC is None:
         await ctx.send("Please make a country before using this command.")
         return
 
-    if args == None:
+    if args is None:
         await ctx.send("Please specify which country you want to contact. Your options are as follows: ",
                        delete_after=3)
         await ctx.send(options, delete_after=10)
@@ -608,11 +600,13 @@ async def message(ctx, args=None):
 
     await ctx.send(f"Contacting {target}...", delete_after=3)
 
+    targetC = None
+
     for i, country in enumerate(Countries):
         if country.name == target:
             targetC = country
 
-    if targetC == None:
+    if targetC is None:
         await ctx.send("404: Country not found", delete_after=3)
         return
 
@@ -626,6 +620,8 @@ async def message(ctx, args=None):
 
     comboChannelName = targetChannelName + "-" + userChannelName
 
+    exist = False
+
     for channel in ctx.guild.channels:
         if channel.name == comboChannelName:
             exist = True
@@ -636,7 +632,7 @@ async def message(ctx, args=None):
     userRole = get(ctx.guild.roles, name=userRoleName)
     targetRole = get(ctx.guild.roles, name=targetRoleName)
 
-    if exist == True:
+    if exist is True:
         channel = get(ctx.guild.channels, name=comboChannelName)
 
         await channel.send(userRole.mention + " You have mail from " + targetRole.mention + "!")
@@ -651,18 +647,12 @@ async def message(ctx, args=None):
     await ctx.message.delete()
 
 
-pass
-
-
 # Begin a crisis
 @client.command(aliases=["c"])
 # only chair can use
 @commands.has_role(929940836475625513)
 async def crisis(ctx):
     await ctx.send("CRISIS!!")
-
-
-pass
 
 
 # Opt in/out of crises
@@ -680,8 +670,6 @@ async def crisisOpt(ctx):
 # token = "your mother"
 # save_object(token, "token.p")
 
-
-pass
 if __name__ == "__main__":
     # Run
     token = pickle.load(open("src/pickle/token.p", "rb"))
