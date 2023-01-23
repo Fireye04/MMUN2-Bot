@@ -6,7 +6,7 @@ from random import choice
 import nest_asyncio
 from discord.ext import commands
 
-import pickle
+from Commands.contact import *
 from Commands.countryIntel import *
 from Commands.functions import *
 from Commands.help import *
@@ -193,6 +193,8 @@ class Country:
 
         self.standard_of_living = yoink(statsEdit)
 
+        self.happiness = 0
+
         self.land_lumber = yoink(statsEdit)
 
         self.land_ore = yoink(statsEdit)
@@ -286,6 +288,7 @@ class Country:
         # embedVar.add_field(name=str(self.land_uranium), value="Land Uranium", inline=True)
         embedVar.add_field(name=str(self.land_fertility), value="Soil Fertility", inline=True)
         embedVar.add_field(name=str(self.standard_of_living), value="Standard of Living", inline=True)
+        embedVar.add_field(name=str(self.happiness), value="Happiness", inline=True)
         embedVar.add_field(name=str(self.nationalism), value="Nationalism", inline=True)
         embedVar.add_field(name=str(self.education), value="Education", inline=True)
         embedVar.add_field(name=str(self.wealth), value="Wealth", inline=True)
@@ -468,183 +471,13 @@ async def research(ctx, *, arg=None):
 # get actions
 @client.command(aliases=["a"])
 async def actions(ctx):
-    with open('src/pickle/Countries', 'rb') as ctry:
-        Countries = pickle.load(ctry)
-    target = None
-    for i in Countries:
-        if ctx.message.author.id == i.managerID:
-            target = i
-            break
-    if target is None:
-        return
-
-    embedVar = discord.Embed(title=f"{target.name} Actions", description="Country Actions", color=0xe74c3c)
-    embedVar.add_field(name="1) Build Infrastructure", value="Construct or improve crucial infrastructure",
-                       inline=False)
-    embedVar.add_field(name="2) Budget Allocation", value="INCOMPLETE", inline=False)
-    await ctx.send(embed=embedVar)
-
-    await ctx.send("Please provide the corresponding number for the option you wish to select")
-
-    def check(m):
-        return m.channel == ctx.message.channel and m.author == ctx.message.author
-
-    aChoice = await client.wait_for('message', check=check)
-    print(aChoice.content)
-    if aChoice.content == "1":
-        embedVar = discord.Embed(title=f"{target.name} Infrastructure", description="Country Infrastructure",
-                                 color=0xe74c3c)
-        fields = 0
-        for i, item in enumerate(target.infrastructure):
-            # TODO: add tech descriptors to list and implement here
-
-            for itemm in target.tech:
-
-                if item[3] == itemm[0] and itemm[5]:
-                    fields += 1
-                    embedVar.add_field(name=f"{i + 1}) Build {item[0]}", value=f"cost = {item[4]}", inline=False)
-        if fields == 0:
-            await ctx.send("No infrastructure found. Try researching some tech.")
-            return
-
-        await ctx.send(embed=embedVar)
-
-        await ctx.send("Please provide the corresponding number for the option you wish to select")
-
-        def check(m):
-            return m.channel == ctx.message.channel and m.author == ctx.message.author
-
-        iChoice = await client.wait_for('message', check=check)
-
-        for i, item in enumerate(target.infrastructure):
-            if str(i + 1) == iChoice.content:
-                # cost stuff that I have yet to implement
-                await ctx.send("How many do you wish to purchase? Max is 10, Min is 1. Type 'quit' to quit.")
-
-                def check(m):
-                    return m.channel == ctx.message.channel and m.author == ctx.message.author
-
-                numChoice = await client.wait_for('message', check=check)
-                numChoice = numChoice.content
-                if numChoice == "quit":
-                    await ctx.send("Quit Process.")
-                    return
-                try:
-                    numChoice = int(numChoice)
-                except TypeError:
-                    await ctx.send("Ur dumb. Give me a number, knucklehead.")
-                    return
-
-                if numChoice > 10:
-                    numChoice = 10
-                elif numChoice == 0:
-                    await ctx.send("Quit Process.")
-                    return
-                elif numChoice < 1:
-                    numChoice = 1
-
-                if item[1] + numChoice > 10:
-                    numChoice = 10 - item[1]
-
-                item[1] += numChoice
-                save_object(Countries, "src/pickle/Countries")
-
-                await ctx.send(f"{numChoice} {item[0]} purchased!")
-
-                if numChoice == 1:
-                    await ctx.send(f"Plurals are a pain in the ass to code, fuck you.")
+    await doActions(ctx, client)
 
 
 # Message another country
 @client.command(aliases=["m"])
 async def message(ctx, args=None):
-    with open('src/pickle/Countries', 'rb') as ctry:
-        Countries = pickle.load(ctry)
-
-    options = []
-    for i in Countries:
-        options.append(i.name)
-
-    userC = None
-    for i in Countries:
-        if ctx.message.author.id == i.managerID:
-            userC = i
-            break
-
-    if userC is None:
-        await ctx.send("Please make a country before using this command.")
-        return
-
-    if args is None:
-        await ctx.send("Please specify which country you want to contact. Your options are as follows: ",
-                       delete_after=3)
-        await ctx.send(options, delete_after=10)
-
-        def check(m):
-            return m.channel == ctx.message.channel and m.author == ctx.message.author
-
-        name = await client.wait_for('message', check=check)
-        print(options)
-        if name.content in options:
-            target = name.content
-        else:
-            await ctx.send("Country not found, watch your caps", delete_after=3)
-            return
-        await name.delete()
-    else:
-        if args in options:
-            target = args
-        else:
-            await ctx.send("Country not found, watch your caps", delete_after=3)
-            return
-
-    await ctx.send(f"Contacting {target}...", delete_after=3)
-
-    targetC = None
-
-    for i, country in enumerate(Countries):
-        if country.name == target:
-            targetC = country
-
-    if targetC is None:
-        await ctx.send("404: Country not found", delete_after=3)
-        return
-
-    category = get(ctx.guild.categories, name=targetC.categoryName)
-
-    targetRoleName = targetC.roleName
-    targetChannelName = targetC.channelNames
-
-    userRoleName = userC.roleName
-    userChannelName = userC.channelNames
-
-    comboChannelName = targetChannelName + "-" + userChannelName
-
-    exist = False
-
-    for channel in ctx.guild.channels:
-        if channel.name == comboChannelName:
-            exist = True
-            break
-        else:
-            exist = False
-
-    userRole = get(ctx.guild.roles, name=userRoleName)
-    targetRole = get(ctx.guild.roles, name=targetRoleName)
-
-    if exist is True:
-        channel = get(ctx.guild.channels, name=comboChannelName)
-
-        await channel.send(userRole.mention + " You have mail from " + targetRole.mention + "!")
-    else:
-        channel = await ctx.guild.create_text_channel(comboChannelName, category=category)
-        await channel.set_permissions(targetRole, view_channel=True, send_messages=True)
-        await channel.set_permissions(userRole, view_channel=True, send_messages=True)
-        await channel.set_permissions(ctx.guild.default_role, view_channel=False)
-
-        await channel.send("Channel configuration success! " + userRole.mention + ", " + targetRole.mention)
-
-    await ctx.message.delete()
+    await sendMessage(ctx, client, args)
 
 
 # Begin a crisis

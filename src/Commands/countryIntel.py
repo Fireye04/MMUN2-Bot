@@ -91,3 +91,91 @@ async def getResearch(ctx, arg):
 
     tech[1] = True
     save_object(Countries, "src/pickle/Countries")
+
+
+async def doActions(ctx, client):
+    with open('src/pickle/Countries', 'rb') as ctry:
+        Countries = pickle.load(ctry)
+    target = None
+    for i in Countries:
+        if ctx.message.author.id == i.managerID:
+            target = i
+            break
+    if target is None:
+        return
+
+    embedVar = discord.Embed(title=f"{target.name} Actions", description="Country Actions", color=0xe74c3c)
+    embedVar.add_field(name="1) Build Infrastructure", value="Construct or improve crucial infrastructure",
+                       inline=False)
+    embedVar.add_field(name="2) Budget Allocation", value="INCOMPLETE", inline=False)
+    await ctx.send(embed=embedVar)
+
+    await ctx.send("Please provide the corresponding number for the option you wish to select")
+
+    def check(m):
+        return m.channel == ctx.message.channel and m.author == ctx.message.author
+
+    aChoice = await client.wait_for('message', check=check)
+    print(aChoice.content)
+    if aChoice.content == "1":
+        embedVar = discord.Embed(title=f"{target.name} Infrastructure", description="Country Infrastructure",
+                                 color=0xe74c3c)
+        fields = 0
+        for i, item in enumerate(target.infrastructure):
+            # TODO: add tech descriptors to list and implement here
+
+            for itemm in target.tech:
+
+                if item[3] == itemm[0] and itemm[5]:
+                    fields += 1
+                    embedVar.add_field(name=f"{i + 1}) Build {item[0]}", value=f"cost = {item[4]}", inline=False)
+        if fields == 0:
+            await ctx.send("No infrastructure found. Try researching some tech.")
+            return
+
+        await ctx.send(embed=embedVar)
+
+        await ctx.send("Please provide the corresponding number for the option you wish to select")
+
+        def check(m):
+            return m.channel == ctx.message.channel and m.author == ctx.message.author
+
+        iChoice = await client.wait_for('message', check=check)
+
+        for i, item in enumerate(target.infrastructure):
+            if str(i + 1) == iChoice.content:
+                # cost stuff that I have yet to implement
+                await ctx.send("How many do you wish to purchase? Max is 10, Min is 1. Type 'quit' to quit.")
+
+                def check(m):
+                    return m.channel == ctx.message.channel and m.author == ctx.message.author
+
+                numChoice = await client.wait_for('message', check=check)
+                numChoice = numChoice.content
+                if numChoice == "quit":
+                    await ctx.send("Quit Process.")
+                    return
+                try:
+                    numChoice = int(numChoice)
+                except TypeError:
+                    await ctx.send("Ur dumb. Give me a number, knucklehead.")
+                    return
+
+                if numChoice > 10:
+                    numChoice = 10
+                elif numChoice == 0:
+                    await ctx.send("Quit Process.")
+                    return
+                elif numChoice < 1:
+                    numChoice = 1
+
+                if item[1] + numChoice > 10:
+                    numChoice = 10 - item[1]
+
+                item[1] += numChoice
+                save_object(Countries, "src/pickle/Countries")
+
+                await ctx.send(f"{numChoice} {item[0]} purchased!")
+
+                if numChoice == 1:
+                    await ctx.send(f"Plurals are a pain in the ass to code, fuck you.")
