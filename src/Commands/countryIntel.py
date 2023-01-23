@@ -1,7 +1,3 @@
-import asyncio
-import discord
-import pickle
-
 from Commands.functions import *
 
 
@@ -46,6 +42,7 @@ async def getTech(ctx, arg):
             await ctx.send(embed=embedVar)
 
     ###ADD MORE TECHS HERE###
+
 
 async def getResearch(ctx, arg):
     target = None
@@ -94,4 +91,3 @@ async def getResearch(ctx, arg):
 
     tech[1] = True
     save_object(Countries, "src/pickle/Countries")
-
