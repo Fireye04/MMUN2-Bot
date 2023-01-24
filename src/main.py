@@ -41,10 +41,14 @@ async def timeUnit():
     save_object(Countries, "src/pickle/Countries")
 
 
+botChannel = None
+
+
 # when the bot is ready
 # Used to run the time loop
 @client.event
 async def on_ready():
+    global botChannel
     print("Ready")
 
     botChannel = get(client.get_guild(929935033869951016).channels, name="bot-announcements")
@@ -54,9 +58,9 @@ async def on_ready():
     while True:
         tme = datetime.now()
         t = tme.strftime("%X")
-        if i % 5 == 0:
+        if i % 10 == 0:
             print(t)
-        if i % 15 == 0:
+        if i % 30 == 0:
             # await botChannel.send("One time unit has passed!")
             print("One time unit has passed!")
             await timeUnit()
@@ -244,6 +248,8 @@ class Country:
 
         self.food_deficit = 0
 
+        self.food_per_turn = 0
+
         self.starvation_time = 0
 
     # self.army_size = 0
@@ -346,6 +352,16 @@ class Country:
                     """for itemm in self.infrastructure:
                         if itemm[3].lower() == item[0].lower():
                             itemm[4] = True"""
+
+        await botChannel.send("-------------------------------")
+        await botChannel.send("`Before`")
+        await botChannel.send(f"```Population- {self.population}\n"
+                              f"Standard of Living- {self.standard_of_living}\n"
+                              f"Food- {self.food}\n"
+                              f"Food Deficit- {self.food_deficit}\n"
+                              f"Starvation Time- {self.starvation_time}\n"
+                              f"Happiness- {self.happiness}\n```")
+
         # Generate resources
         # HARD CODED
         for item in self.infrastructure:
@@ -366,9 +382,6 @@ class Country:
                     # Equation: Food amount = Constant * Number of items * Quality
                     self.food += int(((4 * item[1]) // 2) * item[2])
 
-        # population increase
-        self.population += 1
-
         # Food Subtraction
         self.food -= self.population * (self.standard_of_living // 2)
 
@@ -378,10 +391,25 @@ class Country:
             self.food = 0
             self.starvation_time += 1
 
-            if self.starvation_time >= 3:
-                self.population -= self.food_deficit // 2
+            self.happiness -= (self.food_deficit * self.starvation_time) // 2
+
         else:
             self.starvation_time = 0
+            self.food_deficit = 0
+
+        if self.starvation_time >= 3:
+            self.population -= self.food_deficit // 2
+        else:
+            self.population += (11 - self.standard_of_living)
+
+        await botChannel.send("`After`")
+        await botChannel.send(f"```Population- {self.population}\n"
+                              f"Standard of Living- {self.standard_of_living}\n"
+                              f"Food- {self.food}\n"
+                              f"Food Deficit- {self.food_deficit}\n"
+                              f"Starvation Time- {self.starvation_time}\n"
+                              f"Happiness- {self.happiness}\n```")
+
         # Later, update to give a time buffer between deficit beginning and starvation
     # save_object(Countries, "src/pickle/Countries")
 
